@@ -262,8 +262,8 @@ export function Login() {
               </button>
             </form>
 
-            {/* Forgot Password Link - Replaces previous toggle directly */}
-            <div className="mt-3.5 w-full text-center flex flex-col items-center gap-1.5">
+            {/* Forgot Password Link */}
+            <div className="mt-3.5 w-full text-center flex justify-center">
               <button
                 type="button"
                 onClick={() => {
@@ -275,17 +275,6 @@ export function Login() {
                 className="text-[10px] font-headline font-bold text-neutral-600 hover:text-blue-600 underline uppercase tracking-wider"
               >
                 Forgot Password? Reset Here
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setError(null);
-                }}
-                className="text-[9px] font-headline font-bold text-neutral-400 hover:text-neutral-700 underline uppercase tracking-wider"
-              >
-                {isSignUp ? "Already have an account? Sign In" : "Need a secure login? Create Account"}
               </button>
             </div>
 
