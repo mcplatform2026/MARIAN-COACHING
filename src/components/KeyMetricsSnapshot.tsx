@@ -51,15 +51,7 @@ export const KeyMetricsSnapshot: React.FC<KeyMetricsSnapshotProps> = ({
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
             <span className="p-1 bg-green-100 border border-green-400 text-green-700 font-bold text-xs w-5.5 h-5.5 flex items-center justify-center">
-              {currency === '₹' ? (
-                <span className="font-bold text-[10px] leading-none">₹</span>
-              ) : currency === '€' ? (
-                <span className="font-bold text-[10px] leading-none">€</span>
-              ) : currency === '£' ? (
-                <span className="font-bold text-[10px] leading-none">£</span>
-              ) : (
-                <DollarSign className="w-3.5 h-3.5" />
-              )}
+              <DollarSign className="w-3.5 h-3.5" />
             </span>
             <span className="font-headline font-bold text-xs uppercase text-black">Income</span>
           </div>

@@ -106,19 +106,13 @@ export function Dashboard() {
     handleNameChange(); // Set initially
     window.addEventListener('brandNameChange', handleNameChange);
 
-    const handleCurrencyChange = () => {
-      setCurrency(localStorage.getItem('dashboardCurrency') || '$');
-    };
-    window.addEventListener('dashboardCurrencyChange', handleCurrencyChange);
-
     return () => {
       window.removeEventListener('brandNameChange', handleNameChange);
-      window.removeEventListener('dashboardCurrencyChange', handleCurrencyChange);
     };
   }, []);
   
   const [viewMode, setViewMode] = useState<'Monthly' | 'Yearly' | 'AllTime'>('Monthly');
-  const [currency, setCurrency] = useState(() => localStorage.getItem('dashboardCurrency') || '$');
+  const currency = '$';
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   
@@ -380,31 +374,12 @@ export function Dashboard() {
               Export
             </button>
             
-            <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:gap-2.5">
-            <div className="relative w-full sm:w-auto">
-              <select 
-                value={currency} 
-                onChange={(e) => {
-                  setCurrency(e.target.value);
-                  localStorage.setItem('dashboardCurrency', e.target.value);
-                  window.dispatchEvent(new Event('dashboardCurrencyChange'));
-                }}
-                className="w-full sm:w-auto px-3 py-1.5 font-headline font-bold uppercase tracking-wider text-xs border-2 border-black bg-white focus:outline-none cursor-pointer appearance-none text-black neu-shadow-sm pr-7 min-w-[90px] transition-all hover:bg-neutral-50"
-                style={{ WebkitAppearance: 'none', appearance: 'none', backgroundPosition: 'right 0.35rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1rem', backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7 10l5 5 5-5z"/></svg>')` }}
-              >
-                <option value="$">$ (USD)</option>
-                <option value="₹">₹ (INR)</option>
-                <option value="€">€ (EUR)</option>
-                <option value="£">£ (GBP)</option>
-              </select>
-            </div>
             <button 
               onClick={() => setViewMode(viewMode === 'AllTime' ? 'Monthly' : 'AllTime')} 
               className={`w-full sm:w-auto px-3.5 py-1.5 border-2 border-black text-xs font-bold uppercase tracking-wide transition-colors duration-100 neu-shadow-sm active:translate-y-0.5 active:shadow-none ${viewMode === 'AllTime' ? 'bg-primary-container text-white border-black' : 'bg-white text-black hover:bg-neutral-100'}`}
             >
               All Time
             </button>
-          </div>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto overflow-visible sm:items-center">

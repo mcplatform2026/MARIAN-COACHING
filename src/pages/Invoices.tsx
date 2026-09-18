@@ -1741,29 +1741,12 @@ export function Invoices() {
                     <input 
                       type="text" 
                       value={website} 
-                      onChange={(e) => setWebsite(e.target.value)}
+                      onChange={(e) => setWebsite(e.target.value)} 
                       className="w-full text-[10px] p-1.5 border border-black bg-neutral-50 focus:outline-none"
                       placeholder="Website"
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="pt-2 border-t border-neutral-100 flex items-center justify-between gap-2">
-                <span className="text-[10px] font-headline font-bold uppercase tracking-wide text-neutral-600">
-                  Select Currency Symbol
-                </span>
-                <select 
-                  value={currencySymbol} 
-                  onChange={(e) => setCurrencySymbol(e.target.value)} 
-                  className="text-xs p-1 border-2 border-black bg-neutral-50 font-bold focus:outline-none"
-                >
-                  <option value="$">$ USD</option>
-                  <option value="₹">₹ INR</option>
-                  <option value="€">€ EUR</option>
-                  <option value="£">£ GBP</option>
-                  <option value="¥">¥ YEN</option>
-                </select>
               </div>
             </div>
           </div>

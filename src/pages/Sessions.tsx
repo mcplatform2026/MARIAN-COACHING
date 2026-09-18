@@ -90,7 +90,7 @@ export function Sessions() {
   const [sessionNotes, setSessionNotes] = useState("");
   const [sessionStatus, setSessionStatus] = useState<'Upcoming' | 'Completed' | 'Cancelled'>('Upcoming');
   const [saving, setSaving] = useState(false);
-  const [currency, setCurrency] = useState(() => localStorage.getItem('app_currency') || '₹');
+  const [currency, setCurrency] = useState(() => localStorage.getItem('app_currency') || '$');
 
   const { user, dbUid } = useAuth();
 

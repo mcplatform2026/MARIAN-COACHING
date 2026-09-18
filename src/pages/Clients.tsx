@@ -719,8 +719,7 @@ export function Clients() {
                       if (field?.type === 'date') {
                         displayVal = formatDateToDDMMYYYY(displayVal);
                       } else if (field?.type === 'currency') {
-                        const curr = client[`${col.id}_currency`] || '₹';
-                        displayVal = `${curr} ${Number(displayVal || 0).toLocaleString()}`;
+                        displayVal = `$ ${Number(displayVal || 0).toLocaleString()}`;
                       } else if (field?.type === 'status') {
                         displayVal = displayVal ? (
                           <span className={`inline-block px-2 py-0.5 text-[9px] font-headline font-black uppercase border-2 border-black tracking-wider ${
@@ -928,21 +927,15 @@ export function Clients() {
                     );
                   } else if (field.type === 'currency') {
                     const currencyKey = `${field.id}_currency`;
-                    const currencyVal = formData[currencyKey] || '₹';
-                    const setCurrencyVal = (v: any) => setFormData(prev => ({ ...prev, [currencyKey]: v }));
+                    if (formData[currencyKey] !== '$') {
+                      formData[currencyKey] = '$';
+                    }
                     
                     inputContent = (
                       <div className="flex w-full">
-                         <select 
-                           value={currencyVal} 
-                           onChange={e => setCurrencyVal(e.target.value)} 
-                           className="bg-surface-container-lowest border-2 border-r-0 border-black px-3 h-11 md:h-12 outline-none font-bold text-xs md:text-sm"
-                         >
-                           <option value="₹">₹</option>
-                           <option value="$">$</option>
-                           <option value="£">£</option>
-                           <option value="€">€</option>
-                         </select>
+                         <span className="bg-surface-container-lowest border-2 border-r-0 border-black px-3.5 h-11 md:h-12 flex items-center justify-center font-bold text-xs md:text-sm text-black">
+                           $
+                         </span>
                          <input 
                            type="number" 
                            value={val || ''} 

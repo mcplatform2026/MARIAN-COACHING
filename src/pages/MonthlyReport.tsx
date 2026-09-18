@@ -50,7 +50,7 @@ export function MonthlyReport() {
   const { sessions, loading: loadingSessions } = useSessions();
 
   const [brandName, setBrandName] = useState(() => localStorage.getItem('brandName') || 'LOREM IPSUM');
-  const [currency, setCurrency] = useState(() => localStorage.getItem('dashboardCurrency') || '$');
+  const currency = '$';
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear());
   const [downloading, setDownloading] = useState(false);
@@ -89,19 +89,14 @@ export function MonthlyReport() {
     }
   }, [location.search]);
 
-  // Load brand name and currency dynamically
+  // Load brand name dynamically
   useEffect(() => {
     const handleNameChange = () => {
       setBrandName(localStorage.getItem('brandName') || 'LOREM IPSUM');
     };
-    const handleCurrencyChange = () => {
-      setCurrency(localStorage.getItem('dashboardCurrency') || '$');
-    };
     window.addEventListener('brandNameChange', handleNameChange);
-    window.addEventListener('dashboardCurrencyChange', handleCurrencyChange);
     return () => {
       window.removeEventListener('brandNameChange', handleNameChange);
-      window.removeEventListener('dashboardCurrencyChange', handleCurrencyChange);
     };
   }, []);
 
