@@ -227,12 +227,28 @@ export function AgreementView() {
           if (docSnap.exists()) {
              const docData = docSnap.data();
              if (docData.type === 'agreement' && docData.data) {
-                const data = docData.data;
+                let data = docData.data;
+                const ownerUid = docData.ownerUid;
+                const agrId = data.id;
+                setResolvedUid(ownerUid);
+                setResolvedId(agrId);
+
+                // Fetch latest live status directly from the user's agreements subcollection
+                if (ownerUid && agrId) {
+                  try {
+                    const freshDocRef = doc(db, `users/${ownerUid}/agreements/${agrId}`);
+                    const freshSnap = await getDoc(freshDocRef);
+                    if (freshSnap.exists()) {
+                      data = { ...data, ...freshSnap.data(), id: agrId };
+                    }
+                  } catch (e) {
+                    console.log("Using cached agreement data from short link");
+                  }
+                }
+
                 setAgreement({ id: data.id, ...data });
                 if (data.status === "accepted") setAccepted(true);
                 setLoading(false);
-                setResolvedUid(docData.ownerUid);
-                setResolvedId(data.id);
                 return;
              } else {
                 setError("Agreement not found");
@@ -324,6 +340,20 @@ export function AgreementView() {
         });
       } catch (dbErr) {
         console.warn("Database update failed, but proceeding locally:", dbErr);
+      }
+
+      // Also update shared_links document if accessed via short link
+      if (!uid && id) {
+        try {
+          const sharedDocRef = doc(db, `shared_links/${id}`);
+          await updateDoc(sharedDocRef, {
+            "data.status": "accepted",
+            "data.clientSignature": clientSig,
+            "data.acceptedAt": new Date().toISOString(),
+          });
+        } catch (sharedErr) {
+          console.warn("Shared link update optional sync:", sharedErr);
+        }
       }
 
       setAgreement((prev: any) => ({

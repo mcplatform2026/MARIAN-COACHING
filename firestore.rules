@@ -6,6 +6,7 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Strictly restricts administrator operations to your 3 designated accounts
     function isAuthorizedEmail() {
       return isSignedIn() && 
              request.auth.token.email != null && 
@@ -16,71 +17,53 @@ service cloud.firestore {
              ];
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function isCollaboratorOnData(docData) {
-      let isEmailCollab = request.auth.token.email != null && (
-        docData.get('collaboratorEmail', '') == request.auth.token.email ||
-        request.auth.token.email in docData.get('allowedCollaborators', [])
-      );
-      
-      let isUidCollab = request.auth.uid != null && (
-        docData.get('collaboratorUid', '') == request.auth.uid ||
-        request.auth.uid in docData.get('allowedCollaborators', [])
-      );
-      
-      return isEmailCollab || isUidCollab;
-    }
-
-    function isCollaborator(userId) {
-      let ownerDoc = get(/databases/$(database)/documents/users/$(userId));
-      let isCollabOnUserDoc = ownerDoc != null && isCollaboratorOnData(ownerDoc.data);
-      
-      let collabEmail = request.auth.token.email;
-      let collabDoc = collabEmail != null ? get(/databases/$(database)/documents/collaborators/$(collabEmail)) : null;
-      let isCollabOnCollabCollection = collabDoc != null && collabDoc.data.ownerUid == userId;
-      return isCollabOnUserDoc || isCollabOnCollabCollection;
-    }
-
+    // User workspaces, clients, sessions, transactions, preferences, and tasks
     match /users/{userId} {
       allow read, write: if isAuthorizedEmail();
                    
+      // Invoices: Clients can view via public link; creating/updating requires authorized admin
       match /invoices/{invoiceId} {
         allow read: if true;
         allow write: if isAuthorizedEmail();
       }
 
+      // Agreements: Clients can view and submit e-signature in any browser / incognito mode; editing requires authorized admin
       match /agreements/{agreementId} {
         allow read: if true;
-        allow update: if isAuthorizedEmail() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'viewedAt', 'acceptedAt', 'clientSignature']));
+        allow update: if isAuthorizedEmail() || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'viewedAt', 'acceptedAt', 'clientSignature'])
+        );
         allow write: if isAuthorizedEmail();
       }
 
+      // Covers all present and future nested subcollections automatically
       match /{allSubcollections=**} {
         allow read, write: if isAuthorizedEmail();
       }
     }
 
+    // Collaborators collection
     match /collaborators/{email} {
       allow get: if isAuthorizedEmail() && request.auth.token.email.lower() == email.lower();
       allow list: if isAuthorizedEmail();
       allow write: if isAuthorizedEmail();
     }
     
-    // Very short links for public sharing
+    // Public short links for shared documents (agreements & invoices)
+    // Accessible by anyone in incognito or any browser without an account
     match /shared_links/{shortId} {
       allow read: if true;
-      allow write: if isAuthorizedEmail();
+      allow update: if isAuthorizedEmail() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['data']);
+      allow create, delete: if isAuthorizedEmail();
     }
     
-    // Legacy shared invoices for public client views
+    // Public short links for shared invoices
     match /shared_invoices/{shortId} {
       allow read: if true;
       allow write: if isAuthorizedEmail();
     }
 
+    // Default deny for all other paths
     match /{document=**} {
       allow read, write: if false;
     }
