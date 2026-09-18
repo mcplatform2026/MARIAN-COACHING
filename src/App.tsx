@@ -21,11 +21,45 @@ import { Login } from "./pages/Login";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { CloudStorageSync } from "./components/CloudStorageSync";
 import { BrandSync } from "./components/BrandSync";
+import { isEmailAuthorized } from "./lib/authorizedEmails";
+import { auth } from "./lib/firebase";
 
 const ProtectedRoute = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f4f2ec] flex items-center justify-center p-4">
+        <div className="border-2 border-black bg-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
+          <p className="font-headline font-bold text-xs uppercase tracking-wider animate-pulse text-neutral-700">Verifying authorized access...</p>
+        </div>
+      </div>
+    );
+  }
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  if (!isEmailAuthorized(user.email)) {
+    return (
+      <div className="min-h-screen bg-[#f4f2ec] flex items-center justify-center p-4">
+        <div className="max-w-md w-full border-2 border-black bg-white p-6 md:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center">
+          <div className="w-12 h-12 border-2 border-black bg-red-100 text-red-600 font-black text-2xl flex items-center justify-center mx-auto mb-4">
+            !
+          </div>
+          <h2 className="font-headline font-black text-lg uppercase tracking-tight text-neutral-900 mb-2">
+            Access Restricted
+          </h2>
+          <p className="text-xs text-neutral-600 font-body mb-5 leading-relaxed">
+            Your account (<strong className="text-black">{user.email || 'unknown'}</strong>) is not on the authorized administrator list for Marian Coaching.
+          </p>
+          <button
+            onClick={() => auth.signOut()}
+            className="w-full py-2.5 bg-black hover:bg-neutral-800 text-white font-headline font-bold text-xs uppercase tracking-wider border-2 border-black transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+          >
+            Sign Out / Switch Account
+          </button>
+        </div>
+      </div>
+    );
   }
   return <Layout />;
 };

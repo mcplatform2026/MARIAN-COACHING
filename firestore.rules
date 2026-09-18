@@ -6,6 +6,16 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAuthorizedEmail() {
+      return isSignedIn() && 
+             request.auth.token.email != null && 
+             request.auth.token.email.lower() in [
+               'jeff@mariancoaching.com',
+               'jeffrey.marian@gmail.com',
+               'mcplatform2026@gmail.com'
+             ];
+    }
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
@@ -35,40 +45,40 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isOwner(userId) || (resource != null && isCollaboratorOnData(resource.data));
-      allow write: if isOwner(userId) || 
-                   (resource != null && isCollaboratorOnData(resource.data)) ||
-                   (request.resource != null && isCollaboratorOnData(request.resource.data));
+      allow read, write: if isAuthorizedEmail();
                    
       match /invoices/{invoiceId} {
         allow read: if true;
+        allow write: if isAuthorizedEmail();
       }
+
       match /agreements/{agreementId} {
         allow read: if true;
-        allow update: if isOwner(userId) || isCollaborator(userId) || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'viewedAt', 'acceptedAt', 'clientSignature']));
-        allow write: if isOwner(userId) || isCollaborator(userId);
+        allow update: if isAuthorizedEmail() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'viewedAt', 'acceptedAt', 'clientSignature']));
+        allow write: if isAuthorizedEmail();
       }
+
       match /{allSubcollections=**} {
-        allow read, write: if isOwner(userId) || isCollaborator(userId);
+        allow read, write: if isAuthorizedEmail();
       }
     }
 
     match /collaborators/{email} {
-      allow get: if isSignedIn() && request.auth.token.email == email;
-      allow list: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow write: if isSignedIn();
+      allow get: if isAuthorizedEmail() && request.auth.token.email.lower() == email.lower();
+      allow list: if isAuthorizedEmail();
+      allow write: if isAuthorizedEmail();
     }
     
-    // Very short links
+    // Very short links for public sharing
     match /shared_links/{shortId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isAuthorizedEmail();
     }
     
-    // Legacy shared invoices
+    // Legacy shared invoices for public client views
     match /shared_invoices/{shortId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isAuthorizedEmail();
     }
 
     match /{document=**} {

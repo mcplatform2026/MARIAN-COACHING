@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signInWithGoogle, auth } from "../lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { Mail, Lock, LogIn, UserPlus, ArrowLeft, CheckCircle2, KeyRound } from "lucide-react";
+import { isEmailAuthorized } from "../lib/authorizedEmails";
 
 export function Login() {
   const navigate = useNavigate();
@@ -21,7 +22,13 @@ export function Login() {
   const handleGoogleLogin = async () => {
     setError(null);
     try {
-      await signInWithGoogle();
+      const loggedInUser = await signInWithGoogle();
+      const userEmail = loggedInUser?.email;
+      if (!isEmailAuthorized(userEmail)) {
+        await auth.signOut();
+        setError(`Access denied. The account (${userEmail || "unknown"}) is not authorized. Only designated Marian Coaching administrators may access this portal.`);
+        return;
+      }
       navigate("/");
     } catch (err: any) {
       console.error("Google login failed", err);
@@ -41,6 +48,12 @@ export function Login() {
       setError("Please fill in both email and password fields.");
       return;
     }
+
+    if (!isEmailAuthorized(email)) {
+      setError("Access restricted. This email is not on the authorized administrator list.");
+      return;
+    }
+
     setError(null);
     setAuthLoading(true);
     try {
@@ -73,6 +86,12 @@ export function Login() {
       setError("Please provide your email address to receive the password reset link.");
       return;
     }
+
+    if (!isEmailAuthorized(targetEmail)) {
+      setError("Access restricted. This email is not on the authorized administrator list.");
+      return;
+    }
+
     setError(null);
     setResetLoading(true);
     try {
