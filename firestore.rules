@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isCollaboratorOnData(docData) {
+      let isEmailCollab = request.auth.token.email != null && (
+        docData.get('collaboratorEmail', '') == request.auth.token.email ||
+        request.auth.token.email in docData.get('allowedCollaborators', [])
+      );
+      
+      let isUidCollab = request.auth.uid != null && (
+        docData.get('collaboratorUid', '') == request.auth.uid ||
+        request.auth.uid in docData.get('allowedCollaborators', [])
+      );
+      
+      return isEmailCollab || isUidCollab;
+    }
+
+    function isCollaborator(userId) {
+      let ownerDoc = get(/databases/$(database)/documents/users/$(userId));
+      let isCollabOnUserDoc = ownerDoc != null && isCollaboratorOnData(ownerDoc.data);
+      
+      let collabEmail = request.auth.token.email;
+      let collabDoc = collabEmail != null ? get(/databases/$(database)/documents/collaborators/$(collabEmail)) : null;
+      let isCollabOnCollabCollection = collabDoc != null && collabDoc.data.ownerUid == userId;
+      return isCollabOnUserDoc || isCollabOnCollabCollection;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || (resource != null && isCollaboratorOnData(resource.data));
+      allow write: if isOwner(userId) || 
+                   (resource != null && isCollaboratorOnData(resource.data)) ||
+                   (request.resource != null && isCollaboratorOnData(request.resource.data));
+                   
+      match /invoices/{invoiceId} {
+        allow read: if true;
+      }
+      match /agreements/{agreementId} {
+        allow read: if true;
+        allow update: if isOwner(userId) || isCollaborator(userId) || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'viewedAt', 'acceptedAt', 'clientSignature']));
+        allow write: if isOwner(userId) || isCollaborator(userId);
+      }
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId) || isCollaborator(userId);
+      }
+    }
+
+    match /collaborators/{email} {
+      allow get: if isSignedIn() && request.auth.token.email == email;
+      allow list: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow write: if isSignedIn();
+    }
+    
+    // Very short links
+    match /shared_links/{shortId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    // Legacy shared invoices
+    match /shared_invoices/{shortId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

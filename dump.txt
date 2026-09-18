@@ -1,0 +1,156 @@
+return (
+    <div ref={previewContainerRef} className="min-h-screen py-12 px-2 sm:px-6 lg:px-8 font-body text-black flex flex-col items-center " style={{ backgroundColor: currentTheme.bg }}>
+      <div style={{ width: `${794 * previewScale}px`, height: `${pdfHeight * previewScale}px`, position: 'relative' }}>
+        <div style={{ transform: `scale(${previewScale})`, transformOrigin: "top left", width: "794px", position: 'absolute', top: 0, left: 0, display: "flex", flexDirection: "column" }}>
+      <div 
+        ref={pdfRef}
+        className="w-[210mm] shrink-0 bg-white border border-[#d4d4d8] shadow-xl relative"
+        style={{ 
+          backgroundColor: currentTheme.bg,
+          minHeight: '297mm',
+          padding: '20mm',
+          color: currentTheme.text,
+          '--font-headline-family': currentFont.primary,
+          '--font-body-family': currentFont.secondary,
+        } as React.CSSProperties}
+      >
+        {accepted && (
+          <div className="absolute top-4 right-4 flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1 border-2 border-emerald-600 rounded-full font-headline font-bold uppercase text-[10px]" data-html2pdf-ignore="true">
+            <Check size={14} /> Accepted
+          </div>
+        )}
+
+        <div style={{ fontFamily: 'var(--font-body-family)' }}>
+          
+          {/* Header */}
+              <div className="flex justify-between items-start mb-8 header-block">
+                <div>
+                  {agreement.logoImage ? (
+                    <div style={{ width: "160px", display: "flex", justifyContent: "flex-start" }}>
+                      <img src={agreement.logoImage} alt="Brand Custom Logo" style={{ maxHeight: '56px', maxWidth: '100%', objectFit: 'contain' }} />
+                    </div>
+                  ) : (
+                    <div className="font-headline font-black text-2xl uppercase tracking-tighter" style={{ fontFamily: 'var(--font-headline-family)' }}>
+                      {agreement.brandColor ? <span style={{ color: agreement.brandColor }}>LOREM</span> : "LOREM"} IPSUM.
+                    </div>
+                  )}
+                </div>
+                <div className="text-right">
+                  <h1 className="text-4xl font-headline font-black uppercase tracking-tight max-w-full ml-auto text-right" style={{ fontFamily: 'var(--font-headline-family)', color: currentTheme.text }}>
+                    {agreement.title || 'Agreement'}
+                  </h1>
+                  <p className="text-sm mt-2 opacity-80">Prepared for {agreement.clientName || 'Client'}</p>
+                  {agreement.clientEmail && <p className="text-sm mt-1 opacity-80">{agreement.clientEmail}</p>}
+                  <p className="text-xs opacity-70 mt-1">{new Date(agreement.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                  {agreement.fee && <p className="text-sm mt-2 font-bold uppercase tracking-wider opacity-90">Total Fee: {agreement.fee}</p>}
+                </div>
+              </div>
+
+          {/* Tiptap Content */}
+          <div className="prose prose-sm sm:prose-base max-w-none">
+            <style>{`
+                  .studio-tiptap { display: block; }
+                  .studio-tiptap p, .studio-tiptap li { 
+                    page-break-inside: avoid !important; 
+                    break-inside: avoid !important; 
+                    display: block !important;
+                    margin: 0 !important;
+                    padding: 0.25em 0 !important;
+                  }
+                  .header-block { 
+                    page-break-inside: avoid !important; 
+                    break-inside: avoid !important; 
+                    display: flex !important;
+                  }
+                  .signatures-block { 
+                    page-break-inside: avoid !important; 
+                    break-inside: avoid !important; 
+                    display: flex !important;
+                    flex-direction: column !important;
+                  }
+                  .studio-tiptap h1, .studio-tiptap h2, .studio-tiptap h3 { 
+                    page-break-after: avoid !important; 
+                    break-after: avoid !important; 
+                    page-break-inside: avoid !important;
+                    display: block !important;
+                    margin: 0 !important;
+                    padding: 0.5em 0 !important;
+                  }
+                  .studio-tiptap h1 { font-family: var(--font-headline-family); font-size: 1.8em; font-weight: 900; text-transform: uppercase; color: ${currentTheme.text}; }
+                  .studio-tiptap h2 { font-family: var(--font-headline-family); font-size: 1.5em; font-weight: 800; text-transform: uppercase; color: ${currentTheme.text}; }
+                  .studio-tiptap ul { list-style-type: disc; padding-left: 1.5em; margin: 0 !important; padding-top: 0.25em !important; padding-bottom: 0.25em !important; }
+                `}</style>
+            <div className="studio-tiptap" dangerouslySetInnerHTML={{ __html: agreement.projectDetails || '<p className="italic opacity-50">Content will appear here...</p>' }} />
+          </div>
+
+          {/* Signatures */}
+          <div className="mt-16 pt-8 pb-8 pb-8 border-t-2 signatures-block" style={{ borderColor: currentTheme.border }}>
+            <h3 className="font-headline font-black uppercase text-lg mb-8 text-center" style={{ fontFamily: 'var(--font-headline-family)' }}>Signatures & Execution</h3>
+            <div className="flex flex-row gap-12 w-full">
+              
+              {/* Provider Signature */}
+              <div className="flex-1 w-1/2 flex flex-col items-center">
+                <div className="w-full h-32 border-b-2 border-dashed flex items-end justify-center pb-2 relative" style={{ borderColor: currentTheme.border }}>
+                  {agreement.providerSignature ? (
+                    <img src={agreement.providerSignature} alt="Service Provider Signature" className="max-h-24 max-w-full object-contain mix-blend-multiply" />
+                  ) : (
+                    <span className="opacity-30 font-headline uppercase italic">Not provided</span>
+                  )}
+                </div>
+                <p className="font-headline font-bold uppercase tracking-wide text-xs mt-4" style={{ fontFamily: 'var(--font-headline-family)' }}>{agreement.providerSignatureLabel || 'Service Provider Name'}</p>
+                <p className="font-body text-xs mt-1 opacity-60">
+                  {new Date(agreement.createdAt || Date.now()).toLocaleString()}
+                </p>
+              </div>
+
+              {/* Client Signature */}
+              <div className="flex-1 w-1/2 flex flex-col items-center">
+                <div className="w-full min-h-[8rem] border-b-2 border-dashed flex items-end justify-center pb-2 relative" style={{ borderColor: currentTheme.border }}>
+                  {accepted || agreement.clientSignature ? (
+                    <img src={agreement.clientSignature || clientSig} alt="Client Signature" className="max-h-24 max-w-full object-contain mix-blend-multiply" />
+                  ) : (
+                    <div className="w-full" data-html2pdf-ignore="true">
+                      <SignatureCanvasBlock onSignatureReady={setClientSig} label="Draw Signature" />
+                    </div>
+                  )}
+                </div>
+                <p className="font-headline font-bold uppercase tracking-wide text-xs mt-4" style={{ fontFamily: 'var(--font-headline-family)' }}>{agreement.clientName}</p>
+                {accepted && (
+                  <p className="font-body text-xs mt-1 opacity-60">
+                    {new Date(agreement.acceptedAt).toLocaleString()}
+                  </p>
+                )}
+              
+      
+      
+      
+      
+      </div>
+      </div>
+      </div>
+        </div>
+      </div>
+    </div>
+      
+    {/* Actions - Hidden from PDF */}
+    <div className="mt-8 mb-16 flex flex-col items-center justify-center w-full max-w-3xl" data-html2pdf-ignore="true">
+      {!accepted ? (
+        <button 
+          onClick={handleAgree}
+          className="px-8 py-4 bg-primary-container text-white border-2 border-black neu-shadow font-headline font-black uppercase tracking-wider text-sm transition-all hover:translate-y-0.5 hover:shadow-none"
+        >
+          I Agree & Accept
+        </button>
+      ) : (
+        <button 
+          onClick={handleDownloadPDF}
+          disabled={downloading}
+          className="px-8 py-4 bg-neutral-900 text-white border-2 border-black neu-shadow font-headline font-black uppercase tracking-wider text-sm transition-all hover:translate-y-0.5 hover:shadow-none disabled:opacity-50 flex items-center gap-2"
+        >
+          <Download size={18} /> {downloading ? 'Rendering...' : 'Download PDF Copy'}
+        </button>
+      )}
+    </div>
+  </div>
+  );
+}

@@ -1,0 +1,301 @@
+            
+            {/* The sheet element captured inside screenshot/pdf */}
+            <div 
+              id="invoice-capture-area"
+              className="px-8 pt-8 pb-8 shadow-lg border-2 w-[600px] flex flex-col transition-colors duration-150 relative overflow-hidden"
+              style={{ 
+                borderColor: themes[invoiceTheme].border,
+                backgroundColor: themes[invoiceTheme].bg,
+                color: themes[invoiceTheme].text,
+                '--font-headline-family': invoiceTypography === 'modern' ? "'Space Grotesk', sans-serif" :
+                                         invoiceTypography === 'classic' ? "'Inter', sans-serif" :
+                                         invoiceTypography === 'tech' ? "'Sora', sans-serif" :
+                                         invoiceTypography === 'elegant' ? "'Archivo', sans-serif" :
+                                         "'Plus Jakarta Sans', sans-serif",
+                '--font-body-family': invoiceTypography === 'modern' ? "'Plus Jakarta Sans', sans-serif" :
+                                     invoiceTypography === 'classic' ? "'Inter', sans-serif" :
+                                     invoiceTypography === 'tech' ? "'Sora', sans-serif" :
+                                     invoiceTypography === 'elegant' ? "'Archivo', sans-serif" :
+                                     "'Plus Jakarta Sans', sans-serif"
+              } as React.CSSProperties}
+            >
+              {/* Subtle creative background geometric framing element (designed digitally) */}
+              <div className="absolute inset-0 border-8 border-white/40 pointer-events-none" />
+
+              <div>
+                
+                {/* 1. Header Box Section */}
+                <div 
+                  className="flex justify-between items-center pb-4" 
+                  style={{ borderColor: themes[invoiceTheme].border }}
+                >
+                  
+                  {/* Brand logo container */}
+                  <div className="min-h-[48px] flex items-center">
+                    {logoImage ? (
+                      <div style={{ width: `${(logoImageScale || 100) * 1.6}px`, display: 'flex', justifyContent: 'flex-start' }}>
+                        <img 
+                          src={logoImage} 
+                          alt="Brand Custom Logo" 
+                          style={{ 
+                            maxHeight: '64px',
+                            maxWidth: '100%',
+                            objectFit: 'contain'
+                          }} 
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-left font-sans select-none tracking-tight" style={{ lineHeight: "1" }}>
+                        <div className="text-[21px] font-headline font-bold uppercase tracking-tight" style={{ color: "#262626" }}>
+                          {brandNamePart1}
+                        </div>
+                        <div className="text-[25px] font-headline font-bold uppercase tracking-tight mt-0.5" style={{ color: themes[invoiceTheme].text }}>
+                          {brandNamePart2}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* LARGE INVOICE WORD IN BRAND FONT */}
+                  <div>
+                    <h1 
+                      className="text-[44px] tracking-tight font-black font-headline leading-none uppercase text-right select-none pr-1"
+                      style={{ color: themes[invoiceTheme].text }}
+                    >
+                      INVOICE
+                    </h1>
+                  </div>
+
+                </div>
+
+                {/* 2. Billing & Meta information block */}
+                <div className="grid grid-cols-2 pt-6 pb-6 text-sm">
+                  
+                  {/* Left Column: Billed To / Recipient */}
+                  <div className="space-y-1">
+                    <p className="font-headline font-bold text-[10px] tracking-widest uppercase" style={{ color: "#737373" }}>
+                      BILLED TO:
+                    </p>
+                    <p className="font-headline font-black text-sm tracking-tight leading-tight" style={{ color: themes[invoiceTheme].text }}>
+                      {billedToName}
+                    </p>
+                    <p className="font-body font-medium text-[12px] tracking-tight truncate leading-tight" style={{ color: "#525252" }}>
+                      {billedToEmail}
+                    </p>
+                  </div>
+
+                  {/* Right Column: Meta (Date / Invoice No) in Brand style */}
+                  <div className="text-right flex flex-col justify-between h-full space-y-4">
+                    <div className="space-y-0.5">
+                      <p className="font-headline font-bold text-[10px] tracking-widest text-[#5e5e5e] uppercase">
+                        DATE:
+                      </p>
+                      <p className="font-headline font-bold text-[13px] tracking-tight" style={{ color: themes[invoiceTheme].text }}>
+                        {invoiceDate}
+                      </p>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <p className="font-headline font-bold text-[10px] tracking-widest text-[#5e5e5e] uppercase">
+                        INVOICE NO.
+                      </p>
+                      <p className="font-headline font-black text-[14px] tracking-tight pr-0.5" style={{ color: themes[invoiceTheme].text }}>
+                        {invoiceNo}
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 3. Description Table list formatted in brand fonts */}
+                <div className="mt-2 text-left">
+                  
+                  {/* Table Header Bar using brand font */}
+                  <div 
+                    className="grid grid-cols-12 py-2 border-t-[3px] border-b-[3px] font-headline font-bold text-[10px] tracking-widest uppercase"
+                    style={{ borderColor: themes[invoiceTheme].border, color: themes[invoiceTheme].text }}
+                  >
+                    <div className="col-span-10 text-left">
+                      DESCRIPTION
+                    </div>
+                    <div className="col-span-2 text-right">
+                      PRICE
+                    </div>
+                  </div>
+
+                  {/* Rows content list, crafted in brand style */}
+                  <div className="text-sm" style={{ color: themes[invoiceTheme].text }}>
+                    {items.map((item, index) => (
+                      <div 
+                        key={item.id} 
+                        className="grid grid-cols-12 py-3.5 leading-tight items-start"
+                        style={{ borderTop: index > 0 ? `1px solid ${themes[invoiceTheme].rowSeparator}` : "none" }}
+                      >
+                        <div className="col-span-10 pr-4">
+                          <p className="font-headline font-bold text-sm tracking-tight leading-snug flex-wrap break-words" style={{ color: themes[invoiceTheme].text }}>
+                            {item.title}
+                          </p>
+                          {item.subtext && (
+                            <p 
+                              className={`${subtextClasses[subtextStyle]} flex-wrap break-words`}
+                              style={{ color: subtextStyle === "mono" ? "#9ca3af" : "#6b7280" }}
+                            >
+                              {item.subtext}
+                            </p>
+                          )}
+                        </div>
+                        <div className="col-span-2 text-right font-headline font-black whitespace-nowrap text-sm" style={{ color: themes[invoiceTheme].text }}>
+                          {currencySymbol}{item.price.toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* Bottom Portion container */}
+              <div className="mt-2 space-y-2">
+                
+                {/* 4. Terms, total sums and signature */}
+                <div 
+                  className="pt-2 flex flex-col justify-between items-stretch relative"
+                  style={{ borderTop: `2px solid ${themes[invoiceTheme].border}` }}
+                >
+                  
+                  {/* Total summary Row in Brand Space Grotesk */}
+                  <div className="flex justify-end items-center mb-2">
+                    <div className="text-right">
+                      <span className="font-headline font-black text-xs tracking-wider mr-2 uppercase" style={{ color: "#737373" }}>
+                        TOTAL
+                      </span>
+                      <span className="font-headline font-black text-2xl pl-1" style={{ color: themes[invoiceTheme].text }}>
+                        {currencySymbol}{totalAmount.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Terms and conditions signature split */}
+                  <div className="grid grid-cols-12 gap-4 items-end mt-2">
+                    
+                    {/* Left block for editable TERMS */}
+                    <div className="col-span-8 text-left leading-relaxed pr-2 space-y-4">
+                      {paymentDetails && (
+                        <div>
+                          <p className="font-headline font-black uppercase text-xs tracking-wider mb-1" style={{ color: "#1a1c1c" }}>
+                            PAYMENT DETAILS:
+                          </p>
+                          <p className="text-xs leading-relaxed font-semibold font-body whitespace-pre-wrap" style={{ color: "#262626" }}>
+                            {paymentDetails}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-headline font-black uppercase text-[9px] tracking-wider mb-0.5" style={{ color: "#1a1c1c" }}>
+                          TERMS:
+                        </p>
+                        <p className="text-[9px] leading-normal font-semibold font-body whitespace-pre-wrap" style={{ color: "#262626" }}>
+                          {exactTerms}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right block for SIGNATURE */}
+                    <div className="col-span-4 text-right flex flex-col items-end justify-end">
+                      
+                      {signatureImage && (
+                        <div className="flex justify-end mb-1 pr-2">
+                          <img 
+                            src={signatureImage} 
+                            alt="Signature" 
+                            style={{ 
+                              width: `${(signatureImageScale || 100) * 0.8}px`,
+                              maxHeight: '60px',
+                              objectFit: 'contain'
+                            }} 
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      )}
+
+                      {/* Signature graphic text */}
+                      {signatureWritten && (
+                        <div className="h-10 flex items-center justify-end select-none pr-2">
+                          <span 
+                            className="text-3xl font-normal leading-none pr-1"
+                            style={{ 
+                              color: "#262626",
+                              fontFamily: 
+                                signatureFontClass === "font-signature-1" ? "'Amsterdam One', 'Amsterdam', 'Amsterdam-One', cursive" :
+                                signatureFontClass === "font-signature-2" ? "'Caveat', cursive" :
+                                signatureFontClass === "font-signature-3" ? "'Monsieur La Doulaise', cursive" :
+                                "'Meow Script', cursive"
+                            }}
+                          >
+                            {signatureWritten}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Typed capital Name */}
+                      <p 
+                        className="font-headline font-bold text-[10px] tracking-widest uppercase w-32 pt-1 text-center"
+                        style={{ borderTop: "1px solid #d4d4d4", color: "#1a1c1c" }}
+                      >
+                        {signatureName}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* 5. THANK YOU FOR YOUR BUSINESS block */}
+                <div className="mt-6 text-center space-y-4">
+                  
+                  {/* Thank you phrase */}
+                  <h2 
+                    className="font-headline font-black text-[28px] tracking-tight uppercase leading-none select-none whitespace-nowrap overflow-hidden text-ellipsis"
+                    style={{ color: themes[invoiceTheme].text }}
+                  >
+                    {thankYouMessage}
+                  </h2>
+
+                  {/* Footer contact channels row */}
+                  <div 
+                    className="flex flex-row items-center justify-center gap-8 w-full max-w-[500px] mx-auto text-[11px] font-bold font-headline uppercase tracking-wide"
+                    style={{ color: "#262626" }}
+                  >
+                    <span className="flex items-center gap-1.5 whitespace-nowrap">
+                      <Phone size={16} className="w-4 h-4 shrink-0" style={{ color: themes[invoiceTheme].text }} strokeWidth={2.5} />
+                      <span className="translate-y-[1px]">{phone}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 whitespace-nowrap lowercase">
+                      <Mail size={16} className="w-4 h-4 shrink-0" style={{ color: themes[invoiceTheme].text }} strokeWidth={2.5} />
+                      <span className="translate-y-[1px]">{email}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 whitespace-nowrap lowercase">
+                      <Globe size={16} className="w-4 h-4 shrink-0" style={{ color: themes[invoiceTheme].text }} strokeWidth={2.5} />
+                      <span className="translate-y-[1px]">{website}</span>
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+      </div>
+      </section>
+      )}
+
+      {/* SECTION B: PAST INVOICES HISTORY */}
+      {activeTab === "past" && (
+      <section className="space-y-4 animate-in fade-in duration-200">
+        <div className="space-y-6">

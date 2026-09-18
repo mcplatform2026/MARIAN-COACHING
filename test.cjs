@@ -1,0 +1,1 @@
+console.log("Email clients and WhatsApp Web/Apps physically do NOT allow web browsers to automatically attach local files (like a downloaded PDF) directly into a drafted message via URL parameters due to security sandboxing. The user must manually attach the file.")

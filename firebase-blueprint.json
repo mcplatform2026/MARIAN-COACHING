@@ -1,0 +1,242 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial transaction representing income or expense",
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the transaction"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The monetary value of the transaction"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the transaction"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type: income or expense"
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of transaction"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp in epoch milliseconds"
+        }
+      },
+      "required": ["description", "amount", "date", "type", "category"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Details of the generated invoice and client metadata",
+      "type": "object",
+      "properties": {
+        "invoiceNo": {
+          "type": "string",
+          "description": "Unique invoice statement number"
+        },
+        "invoiceDate": {
+          "type": "string",
+          "description": "Date when invoice was issued"
+        },
+        "invoiceTheme": {
+          "type": "string",
+          "description": "Theme name used for the invoice styling"
+        },
+        "billedToName": {
+          "type": "string",
+          "description": "Client name"
+        },
+        "billedToEmail": {
+          "type": "string",
+          "description": "Client email"
+        },
+        "billedToAddress": {
+          "type": "string",
+          "description": "Client address"
+        },
+        "billedToPhone": {
+          "type": "string",
+          "description": "Client phone number"
+        },
+        "billedToCompany": {
+          "type": "string",
+          "description": "Client company name"
+        },
+        "billedToTaxId": {
+          "type": "string",
+          "description": "Client Tax registration ID"
+        },
+        "billingFromName": {
+          "type": "string",
+          "description": "Issuer name"
+        },
+        "billingFromEmail": {
+          "type": "string",
+          "description": "Issuer email"
+        },
+        "billingFromAddress": {
+          "type": "string",
+          "description": "Issuer address"
+        },
+        "billingFromPhone": {
+          "type": "string",
+          "description": "Issuer phone"
+        },
+        "billingFromCompany": {
+          "type": "string",
+          "description": "Issuer company name"
+        },
+        "billingFromTaxId": {
+          "type": "string",
+          "description": "Issuer Tax registration ID"
+        },
+        "items": {
+          "type": "array",
+          "description": "Line items in the invoice containing description, quantity, rate, amount"
+        },
+        "taxRate": {
+          "type": "number",
+          "description": "Tax percentage applied"
+        },
+        "discountRate": {
+          "type": "number",
+          "description": "Discount percentage applied"
+        },
+        "currencySymbol": {
+          "type": "string",
+          "description": "Currency symbol"
+        },
+        "currencyCode": {
+          "type": "string",
+          "description": "Currency code"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional payment terms or invoice notes"
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "Total sum of all line items"
+        },
+        "taxAmount": {
+          "type": "number",
+          "description": "Calculated tax value"
+        },
+        "discountAmount": {
+          "type": "number",
+          "description": "Calculated discount value"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total final invoice due amount"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Status of payment: Unpaid, Paid, etc."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp when the invoice was first saved"
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Timestamp when the invoice was last modified"
+        }
+      },
+      "required": ["invoiceNo", "invoiceDate", "billedToName", "billedToEmail", "totalAmount"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "Client appointment or training session",
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "ID of the client"
+        },
+        "clientName": {
+          "type": "string",
+          "description": "Name of the client"
+        },
+        "clientEmail": {
+          "type": "string",
+          "description": "Email of the client"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title or type of the session"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the session (YYYY-MM-DD)"
+        },
+        "time": {
+          "type": "string",
+          "description": "The time of the session (HH:MM)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Session summary or notes"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status: Upcoming, Completed, Cancelled"
+        },
+        "rate": {
+          "type": "number",
+          "description": "The rate or fee for this session"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp in epoch milliseconds"
+        }
+      },
+      "required": ["clientId", "clientName", "title", "date", "status"]
+    },
+    "Collaborator": {
+      "title": "Collaborator",
+      "description": "Mapping of collaborator email to owner user ID",
+      "type": "object",
+      "properties": {
+        "collaboratorEmail": {
+          "type": "string"
+        },
+        "ownerUid": {
+          "type": "string"
+        },
+        "ownerEmail": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "object"
+        }
+      },
+      "required": ["collaboratorEmail", "ownerUid"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "User transaction ledger"
+    },
+    "/users/{userId}/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "User generated invoices"
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "User scheduled client sessions"
+    },
+    "/collaborators/{email}": {
+      "schema": "Collaborator",
+      "description": "Collaborator access permissions"
+    }
+  }
+}

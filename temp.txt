@@ -1,0 +1,66 @@
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                action: {
+                  type: "STRING",
+                  description: "The action key: 'ADD_TRANSACTION', 'ADD_CLIENT', 'ADD_INVOICE', 'NAVIGATE', 'DOWNLOAD_INVOICE', or 'UNKNOWN'"
+                },
+                feedback: {
+                  type: "STRING",
+                  description: "A friendly, conversational spoken voice response. E.g., 'Okay, adding a 45 dollar expense for office supplies' or 'Navigating to your June 2026 finance report.'"
+                },
+                parameters: {
+                  type: "OBJECT",
+                  properties: {
+                    type: { type: "STRING", description: "'Income' or 'Expense'" },
+                    amount: { type: "NUMBER" },
+                    description: { type: "STRING" },
+                    date: { type: "STRING" },
+                    clientName: { type: "STRING" },
+                    upfrontAmount: { type: "NUMBER" },
+                    finalAmount: { type: "NUMBER" },
+                    path: { type: "STRING" },
+                    monthName: { type: "STRING" },
+                    yearValue: { type: "INTEGER" },
+                    invoiceNo: { type: "STRING" },
+                    billedTo: { type: "STRING" },
+                    billedToName: { type: "STRING" },
+                    billedToEmail: { type: "STRING" },
+                    itemTitle: { type: "STRING" },
+                    itemPrice: { type: "NUMBER" }
+                  }
+                }
+              },
+              required: ["action", "feedback"]
+            }
+          }
+        };
+
+        const resDirect = await fetch(endpoint, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(requestPayload)
+        });
+
+        if (!resDirect.ok) {
+          const errorText = await resDirect.text();
+          throw new Error(`Gemini API returned error ${resDirect.status}: ${errorText}`);
+        }
+
+        const responseData = await resDirect.json();
+        resultText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+        logDebug(`[VOICE] Gemini REST Output: ${resultText}`);
+      } else {
+        logDebug(`[VOICE] Using @google/genai SDK for API Key`);
+        const ai = getGeminiClient();
+        const response = await ai.models.generateContent({
+          model: "gemini-3.6-flash",

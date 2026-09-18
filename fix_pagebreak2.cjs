@@ -1,0 +1,12 @@
+const fs = require('fs');
+const files = [
+  'src/pages/DocumentView.tsx',
+  'src/pages/AgreementView.tsx',
+  'src/components/AgreementStudio.tsx'
+];
+files.forEach(file => {
+  let content = fs.readFileSync(file, 'utf8');
+  content = content.replace(/pagebreak: \{ mode: 'avoid-all', avoid: \['\.signatures-block', '\.header-block'\] \}/g, "pagebreak: { mode: 'css', avoid: ['.signatures-block', '.header-block'] }");
+  fs.writeFileSync(file, content);
+});
+console.log('fixed pagebreak 2');

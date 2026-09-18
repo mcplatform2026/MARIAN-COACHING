@@ -1,0 +1,8 @@
+{
+  "name": "PRA:ANTA OS I SOLO SERVICE KIT",
+  "description": "",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
