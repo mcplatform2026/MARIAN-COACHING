@@ -88,3 +88,23 @@ export function getCurrentDateMMDDYYYY(): string {
   const yyyy = d.getFullYear();
   return `${mm}/${dd}/${yyyy}`;
 }
+
+export function formatToISODate(val: string): string {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+    const parts = str.split('/');
+    let mm = parts[0].padStart(2, '0');
+    let dd = parts[1].padStart(2, '0');
+    const yyyy = parts[2];
+    // If mm > 12, user typed DD/MM/YYYY -> swap
+    if (parseInt(mm, 10) > 12 && parseInt(dd, 10) <= 12) {
+      const tmp = mm;
+      mm = dd;
+      dd = tmp;
+    }
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return '';
+}

@@ -35,7 +35,8 @@ export function Login() {
       if (err.code === "auth/popup-blocked") {
         setError("Your browser blocked the Google pop-up. If you are in the preview window, please click the 'Open in new tab' button (top right) and try again.");
       } else if (err.code === "auth/unauthorized-domain") {
-        setError("This domain is not authorized. Please add this app's URL to 'Authorized Domains' in your Firebase Authentication settings.");
+        const currentHost = window.location.hostname;
+        setError(`Domain not authorized (${currentHost}). To fix Google Sign-In, add "${currentHost}" to Firebase Console → Authentication → Settings → Authorized domains. Alternatively, sign in above using your authorized email & password.`);
       } else {
         setError("Google sign-in failed. Try opening this app in a new tab by clicking the button at the top right of the preview window.");
       }

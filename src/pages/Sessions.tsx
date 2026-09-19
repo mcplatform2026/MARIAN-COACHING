@@ -29,7 +29,8 @@ import {
   LockOpen,
   User
 } from "lucide-react";
-import { formatDateToMMDDYYYY } from "../utils/dateFormat";
+import { formatDateToMMDDYYYY, formatToISODate } from "../utils/dateFormat";
+import { AmericanDateInput } from "../components/AmericanDateInput";
 
 export function Sessions() {
   const navigate = useNavigate();
@@ -794,8 +795,10 @@ export function Sessions() {
 
   // Filtered and Sorted list (newest bookings or new entries appear on top, older ones at the bottom)
   const sortedSessions = [...filteredSessions].sort((a, b) => {
-    // Primary: Sort by Date descending
-    const dateCompare = (b.date || "").localeCompare(a.date || "");
+    // Primary: Sort by Date descending (normalized to ISO)
+    const dateA = formatToISODate(a.date || "") || (a.date || "");
+    const dateB = formatToISODate(b.date || "") || (b.date || "");
+    const dateCompare = dateB.localeCompare(dateA);
     if (dateCompare !== 0) return dateCompare;
     
     // Secondary: Sort by Time descending
@@ -1394,12 +1397,12 @@ export function Sessions() {
                 {/* Date & Time Split */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-body font-bold text-[10px] mb-1 uppercase tracking-wide">Date *</label>
-                    <input
-                      type="date"
+                    <label className="block font-body font-bold text-[10px] mb-1 uppercase tracking-wide">Date * (MM/DD/YYYY)</label>
+                    <AmericanDateInput
                       required
                       value={sessionDate}
-                      onChange={(e) => setSessionDate(e.target.value)}
+                      onChange={(val) => setSessionDate(val)}
+                      placeholder="MM/DD/YYYY"
                       className="w-full border-2 border-black p-2 text-xs font-body font-medium bg-surface-container-low focus:bg-white focus:outline-none"
                     />
                   </div>

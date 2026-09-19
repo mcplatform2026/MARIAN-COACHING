@@ -39,6 +39,7 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, setDoc, query, orderBy, 
 import { db, auth } from "../lib/firebase";
 import { useAuth } from "../components/AuthProvider";
 import { formatDateToMMDDYYYY } from "../utils/dateFormat";
+import { AmericanDateInput } from "../components/AmericanDateInput";
 
 interface InvoiceItem {
   id: string;
@@ -1392,14 +1393,13 @@ export function Invoices() {
             <div className="grid grid-cols-2 gap-3 hover:bg-neutral-50/40 p-1">
               <div>
                 <label className="block text-[10px] font-headline font-bold uppercase tracking-wide text-neutral-600 mb-1">
-                  Invoice Date
+                  Invoice Date (MM/DD/YYYY)
                 </label>
-                <input 
-                  type="date" 
-                  value={invoiceDate} 
-                  onChange={(e) => setInvoiceDate(e.target.value)}
+                <AmericanDateInput
+                  value={invoiceDate}
+                  onChange={(val) => setInvoiceDate(val)}
                   className="w-full text-xs p-2 border-2 border-black bg-neutral-50 focus:outline-none"
-                  placeholder=""
+                  placeholder="MM/DD/YYYY"
                 />
               </div>
               <div>

@@ -5,6 +5,7 @@ import { useAuth } from "../components/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { Pencil, Trash2, FileText, ExternalLink, Link, Plus, Upload, Download, Undo2 } from "lucide-react";
 import { formatDateToMMDDYYYY } from "../utils/dateFormat";
+import { AmericanDateInput } from "../components/AmericanDateInput";
 
 export function Clients() {
   const { user } = useAuth();
@@ -907,13 +908,22 @@ export function Clients() {
                   let setVal = (v: any) => setFormData(prev => ({ ...prev, [field.id]: v }));
 
                   let inputContent = null;
-                  if (field.type === 'text' || field.type === 'url' || field.type === 'date' || field.type === 'number') {
+                  if (field.type === 'date') {
+                    inputContent = (
+                      <AmericanDateInput 
+                        value={val || ''} 
+                        onChange={v => setVal(v)} 
+                        className="w-full box-border min-w-0 appearance-none rounded-none h-11 md:h-12 bg-surface-container-lowest border-2 border-black px-3 focus:border-primary-container outline-none transition-all font-body font-medium"
+                        placeholder="MM/DD/YYYY"
+                      />
+                    );
+                  } else if (field.type === 'text' || field.type === 'url' || field.type === 'number') {
                     inputContent = (
                       <input 
                         type={field.type} 
                         value={val || ''} 
                         onChange={e => setVal(e.target.value)} 
-                        className={`w-full box-border min-w-0 appearance-none rounded-none h-11 md:h-12 bg-surface-container-lowest border-2 border-black px-3 focus:border-primary-container outline-none transition-all font-body font-medium ${field.type === 'date' ? '' : ''}`}
+                        className="w-full box-border min-w-0 appearance-none rounded-none h-11 md:h-12 bg-surface-container-lowest border-2 border-black px-3 focus:border-primary-container outline-none transition-all font-body font-medium"
                         placeholder={field.type === 'url' ? 'https://...' : ''}
                       />
                     );

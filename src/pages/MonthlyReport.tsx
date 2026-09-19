@@ -123,25 +123,52 @@ export function MonthlyReport() {
     }
     transactions.forEach(t => {
       if (t.date) {
-        const parts = t.date.split('-');
-        if (parts.length > 0) {
-          const y = parseInt(parts[0], 10);
-          if (!isNaN(y)) yearsSet.add(y);
+        if (t.date.includes('-')) {
+          const parts = t.date.split('-');
+          if (parts.length > 0) {
+            const y = parseInt(parts[0], 10);
+            if (!isNaN(y)) yearsSet.add(y);
+          }
+        } else if (t.date.includes('/')) {
+          const parts = t.date.split('/');
+          if (parts.length === 3) {
+            const y = parseInt(parts[2], 10);
+            if (!isNaN(y)) yearsSet.add(y);
+          }
         }
       }
     });
     return Array.from(yearsSet).sort((a, b) => b - a);
   }, [transactions]);
 
-  // Parse YYYY-MM-DD date format
+  // Parse any date format (YYYY-MM-DD or MM/DD/YYYY)
   const isMatchMonthAndYear = (dateStr: string, targetMonth: number, targetYear: number) => {
     if (!dateStr) return false;
-    const parts = dateStr.split('-');
-    if (parts.length >= 2) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1; // 0-indexed month
-      return year === targetYear && month === targetMonth;
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-');
+      if (parts.length >= 2) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // 0-indexed month
+        return year === targetYear && month === targetMonth;
+      }
     }
+    if (dateStr.includes('/')) {
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        let year = parseInt(parts[2], 10);
+        if (year < 100) year += 2000;
+        const p0 = parseInt(parts[0], 10);
+        const p1 = parseInt(parts[1], 10);
+        const month = p0 > 12 ? p1 - 1 : p0 - 1;
+        return year === targetYear && month === targetMonth;
+      }
+    }
+    try {
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) {
+        return d.getFullYear() === targetYear && d.getMonth() === targetMonth;
+      }
+    } catch (e) {}
     return false;
   };
 

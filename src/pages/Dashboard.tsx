@@ -5,14 +5,34 @@ import { useSessions } from '../hooks/useSessions';
 import { DataMigrationModal } from '../components/DataMigrationModal';
 import { Clock, FileText, CheckCircle2, ArrowUpRight, Download, Upload } from 'lucide-react';
 import { formatDateToMMDDYYYY } from '../utils/dateFormat';
+import { AmericanDateInput } from '../components/AmericanDateInput';
 
 const parseDateString = (dateStr: string) => {
   if (!dateStr) return null;
-  const parts = dateStr.split('-');
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1; // 0-indexed month
-  const day = parseInt(parts[2], 10);
-  return { year, month, day };
+  if (dateStr.includes('-')) {
+    const parts = dateStr.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // 0-indexed month
+    const day = parseInt(parts[2], 10);
+    return { year, month, day };
+  }
+  if (dateStr.includes('/')) {
+    const parts = dateStr.split('/');
+    let month = parseInt(parts[0], 10) - 1;
+    let day = parseInt(parts[1], 10);
+    let year = parseInt(parts[2], 10);
+    if (month > 11 && day <= 12) {
+      const tmp = month;
+      month = day - 1;
+      day = tmp + 1;
+    }
+    return { year, month, day };
+  }
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    return { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+  }
+  return null;
 };
 
 export function Dashboard() {
@@ -523,12 +543,12 @@ export function Dashboard() {
                   />
                 </div>
                 <div className="w-full flex flex-col justify-end">
-                  <label className="block font-body font-bold text-sm mb-2 uppercase tracking-wide">Date</label>
-                  <input
+                  <label className="block font-body font-bold text-sm mb-2 uppercase tracking-wide">Date (MM/DD/YYYY)</label>
+                  <AmericanDateInput
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    onChange={(val) => setDate(val)}
                     className="w-full box-border min-w-0 appearance-none rounded-none border-2 border-black p-3 font-body font-medium bg-surface-container-low focus:bg-white focus:outline-none focus:ring-0 focus:border-primary-container transition-colors"
-                    type="date"
+                    placeholder="MM/DD/YYYY"
                   />
                 </div>
                 <div className="w-full flex flex-col justify-end">
@@ -862,12 +882,11 @@ export function Dashboard() {
               {/* Date */}
               <div>
                 <label className="block font-body font-bold text-[10px] mb-1.5 uppercase tracking-wide">Date (MM/DD/YYYY)</label>
-                <input
-                  type="text"
+                <AmericanDateInput
                   required
                   value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  placeholder="e.g. 04/14/2026"
+                  onChange={(val) => setEditDate(val)}
+                  placeholder="MM/DD/YYYY"
                   className="w-full text-xs p-2 border-2 border-black bg-surface-container-low focus:bg-white focus:outline-none text-black"
                 />
               </div>

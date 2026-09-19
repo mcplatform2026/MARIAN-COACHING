@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTasks, Task } from "../hooks/useTasks";
 import { Trash2, Plus, Calendar, Pencil, X, Check } from "lucide-react";
 import { formatDateToMMDDYYYY } from "../utils/dateFormat";
+import { AmericanDateInput } from "../components/AmericanDateInput";
 
 const formatDate = (dateStr: string) => {
   return formatDateToMMDDYYYY(dateStr, '--');
@@ -80,8 +81,9 @@ export function TaskTracker() {
   const isToday = (dateStr?: string) => {
     if (!dateStr) return false;
     const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    return dateStr === todayStr;
+    const todayFormatted = formatDateToMMDDYYYY(today);
+    const dateFormatted = formatDateToMMDDYYYY(dateStr);
+    return dateFormatted === todayFormatted;
   };
 
   const filteredTasks = tasks.filter(task => {
@@ -154,19 +156,12 @@ export function TaskTracker() {
                     <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 0L5 6L10 0H0Z" fill="currentColor"/></svg>
                   </div>
                 </div>
-                <div className="relative inline-flex items-center flex-1 md:flex-none md:w-32 h-[52px] md:h-9 border-2 border-black bg-white focus-within:border-primary-container overflow-hidden">
-                  <Calendar size={16} className="absolute left-2 text-black pointer-events-none z-10" />
-                  {!newTaskDate && (
-                    <span className="absolute left-[30px] text-xs font-bold font-body text-neutral-700 uppercase pointer-events-none z-0">
-                      DD-MM-YYYY
-                    </span>
-                  )}
-                  <input
-                    type="date"
+                <div className="flex-1 md:flex-none md:w-36 h-[52px] md:h-9">
+                  <AmericanDateInput
                     value={newTaskDate}
-                    onChange={(e) => setNewTaskDate(e.target.value)}
-                    className={`relative z-20 appearance-none w-full h-full pl-[30px] pr-0 py-0 bg-transparent font-body text-xs outline-none uppercase font-bold cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer ${!newTaskDate ? 'text-transparent' : 'text-black'}`}
-                    title="Due Date"
+                    onChange={(val) => setNewTaskDate(val)}
+                    placeholder="MM/DD/YYYY"
+                    className="w-full h-[52px] md:h-9 border-2 border-black bg-white px-2.5 font-body text-xs outline-none focus:border-primary-container uppercase font-bold"
                   />
                 </div>
               </div>
@@ -271,10 +266,10 @@ export function TaskTracker() {
                     </td>
                     <td className="px-4 py-3 border-r border-black">
                       {editingTaskId === task.id ? (
-                        <input
-                          type="date"
+                        <AmericanDateInput
                           value={editDate}
-                          onChange={(e) => setEditDate(e.target.value)}
+                          onChange={(val) => setEditDate(val)}
+                          placeholder="MM/DD/YYYY"
                           className="w-full px-2 py-1 border-2 border-black bg-white font-body text-[10px] outline-none focus:border-primary-container uppercase font-bold"
                         />
                       ) : (
