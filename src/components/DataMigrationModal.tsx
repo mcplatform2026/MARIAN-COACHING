@@ -5,6 +5,7 @@ import { useTransactions } from '../hooks/useTransactions';
 import { useSessions } from '../hooks/useSessions';
 import { useAgreements } from '../hooks/useAgreements';
 import { useTasks } from '../hooks/useTasks';
+import { formatDateToMMDDYYYY } from '../utils/dateFormat';
 
 interface DataMigrationModalProps {
   isOpen: boolean;
@@ -37,21 +38,8 @@ export function DataMigrationModal({
     }
   }, []);
 
-  const formatDateToDDMMYYYY = (dateStr: string) => {
-    if (!dateStr) return '--';
-    if (/^\d{2}\/\d{2}\/\d{2}$/.test(dateStr)) return dateStr;
-    const parts = dateStr.split('-');
-    if (parts.length === 3 && parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
-    return dateStr;
-  };
-
   const formatDateFromTimestamp = (ts: any) => {
-    if (!ts) return '--';
-    const d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = String(d.getFullYear()).slice(-2);
-    return `${day}/${month}/${year}`;
+    return formatDateToMMDDYYYY(ts);
   };
 
   const exportCSV = (filename: string, headers: string[], dataRows: any[][]) => {
@@ -79,20 +67,20 @@ export function DataMigrationModal({
 
   const handleExportTransactionsCSV = () => {
     const headers = ['Date', 'Type', 'Description', 'Amount'];
-    const rows = transactions.map(t => [formatDateToDDMMYYYY(t.date), t.type, t.description, t.amount]);
+    const rows = transactions.map(t => [formatDateToMMDDYYYY(t.date), t.type, t.description, t.amount]);
     exportCSV('transactions', headers, rows);
   };
 
   const handleExportAppointmentsCSV = () => {
     const headers = ['Date', 'Time', 'Client', 'Title', 'Status'];
-    const rows = sessions.map(s => [s.date, s.time, s.clientName, s.title, s.status]);
+    const rows = sessions.map(s => [formatDateToMMDDYYYY(s.date), s.time, s.clientName, s.title, s.status]);
     exportCSV('appointments', headers, rows);
   };
   
   
   const handleExportTasksCSV = () => {
     const headers = ['Title', 'Status', 'Priority', 'Due Date'];
-    const rows = tasks.map((t: any) => [t.title, t.status, t.priority, t.dueDate]);
+    const rows = tasks.map((t: any) => [t.title, t.status, t.priority, formatDateToMMDDYYYY(t.dueDate)]);
     exportCSV('tasks', headers, rows);
   };
 
@@ -104,7 +92,14 @@ export function DataMigrationModal({
     }
     if (dateStr.includes('/')) {
       const parts = dateStr.split('/');
-      if (parts.length === 3) return { year: parseInt(parts[2], 10), month: parseInt(parts[1], 10) - 1 };
+      if (parts.length === 3) {
+        let year = parseInt(parts[2], 10);
+        if (year < 100) year += 2000;
+        const p0 = parseInt(parts[0], 10);
+        const p1 = parseInt(parts[1], 10);
+        const month = p0 > 12 ? p1 - 1 : p0 - 1;
+        return { year, month };
+      }
     }
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) return { year: d.getFullYear(), month: d.getMonth() };

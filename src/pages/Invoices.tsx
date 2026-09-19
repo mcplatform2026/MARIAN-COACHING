@@ -38,6 +38,7 @@ import {
 import { collection, addDoc, updateDoc, deleteDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import { useAuth } from "../components/AuthProvider";
+import { formatDateToMMDDYYYY } from "../utils/dateFormat";
 
 interface InvoiceItem {
   id: string;
@@ -80,41 +81,44 @@ export interface SavedInvoice {
   createdAt?: any;
 }
 
-const parseDDMMYYYY = (dateStr: string) => {
+const parseToDate = (dateStr: string) => {
   if (!dateStr) return null;
-  const parts = dateStr.split('/');
-  if (parts.length === 3) {
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const year = parseInt(parts[2], 10);
-    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+  if (dateStr.includes('-')) {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
       return new Date(year, month, day);
     }
   }
-  return null;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const p0 = parseInt(parts[0], 10);
+    const p1 = parseInt(parts[1], 10);
+    let year = parseInt(parts[2], 10);
+    if (year < 100) year += 2000;
+    // If p0 > 12, it was DD/MM/YYYY
+    if (p0 > 12) {
+      return new Date(year, p1 - 1, p0);
+    }
+    // Otherwise MM/DD/YYYY
+    return new Date(year, p0 - 1, p1);
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
 };
 
-const getCurrentDateDDMMYYYY = () => {
-  const d = new Date();
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year.toString().slice(-2)}`;
+const getTodayISODate = () => {
+  return new Date().toISOString().split('T')[0];
 };
-
 
 const sortInvoicesDesc = (invoices: SavedInvoice[]): SavedInvoice[] => {
   return [...invoices].sort((a, b) => {
     const getDateVal = (inv: SavedInvoice) => {
       if (!inv.invoiceDate) return 0;
-      let d = new Date(inv.invoiceDate);
-      if (isNaN(d.getTime())) {
-        const parts = inv.invoiceDate.split('/');
-        if (parts.length === 3) {
-          d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-        }
-      }
-      return isNaN(d.getTime()) ? 0 : d.getTime();
+      const parsed = parseToDate(inv.invoiceDate);
+      return parsed ? parsed.getTime() : 0;
     };
     
     const dateA = getDateVal(a);
@@ -157,7 +161,7 @@ export function Invoices() {
       if (s.items) {
         setItems(s.items);
       }
-      setInvoiceDate(getCurrentDateDDMMYYYY());
+      setInvoiceDate(getTodayISODate());
     }
   }, [location.state]);
   
@@ -245,7 +249,7 @@ export function Invoices() {
   // Invoice Fields
   const [billedToName, setBilledToName] = useState("");
   const [billedToEmail, setBilledToEmail] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState(() => getTodayISODate());
   const [invoiceNo, setInvoiceNo] = useState("");
 
   // Locks for theme and typography
@@ -366,56 +370,11 @@ export function Invoices() {
   const signatureFileInputRef = useRef<HTMLInputElement>(null);
 
   const formatDateForPDF = (dateStr: string) => {
-    if (!dateStr) return "";
-    
-    // Convert dd/mm/yy or yyyy-mm-dd into Date
-    let d = new Date(dateStr);
-    
-    if (dateStr.includes('/')) {
-      const parts = dateStr.split('/');
-      if (parts.length === 3) {
-        let year = parseInt(parts[2], 10);
-        // Handle 2 digit year
-        if (year < 100) year += 2000;
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[0], 10);
-        d = new Date(year, month, day);
-      }
-    } else if (dateStr.includes('-')) {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        d = new Date(year, month, day);
-      }
-    }
-    
-    if (isNaN(d.getTime())) return dateStr;
-    
-    const day = d.getDate();
-    const suffix = (day % 10 === 1 && day !== 11) ? 'st' :
-                   (day % 10 === 2 && day !== 12) ? 'nd' :
-                   (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
-    const month = d.toLocaleDateString('en-US', { month: 'long' });
-    const year = d.getFullYear();
-    
-    return `${day}${suffix} ${month} ${year}`;
-  };  const formatDisplayDate = (dStr: string) => {
-    if (!dStr) return "";
-    if (dStr.includes('-')) {
-      const parts = dStr.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        const d = new Date(year, month, day);
-        if (!isNaN(d.getTime())) {
-          return ((d) => { const dd = String(d.getDate()).padStart(2, '0'); const mm = String(d.getMonth() + 1).padStart(2, '0'); const yy = String(d.getFullYear()).slice(-2); return `${dd}/${mm}/${yy}`; })(d);
-        }
-      }
-    }
-    return dStr;
+    return formatDateToMMDDYYYY(dateStr);
+  };
+
+  const formatDisplayDate = (dStr: string) => {
+    return formatDateToMMDDYYYY(dStr);
   };
 
 
@@ -427,7 +386,7 @@ export function Invoices() {
     setInvoiceTheme("alabaster");
     setBilledToName("Bert Alleyne");
     setBilledToEmail("bertalleyne@outlook.com");
-    setInvoiceDate("14/04/2026");
+    setInvoiceDate("2026-04-14");
     setInvoiceNo("071");
     setItems([
       {

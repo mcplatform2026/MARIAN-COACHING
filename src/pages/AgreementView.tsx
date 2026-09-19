@@ -8,6 +8,7 @@ import { SignatureCanvasBlock } from "../components/SignatureCanvasBlock";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas-pro";
 import html2pdf from "html2pdf.js";
+import { formatDateToMMDDYYYY } from "../utils/dateFormat";
 
 const themes: any = {
   white: {
@@ -501,7 +502,7 @@ export function AgreementView() {
                     </p>
                   )}
                   <p className="text-xs opacity-70 mt-1">
-                    {((d) => { const dd = String(d.getDate()).padStart(2, '0'); const mm = String(d.getMonth() + 1).padStart(2, '0'); const yy = String(d.getFullYear()).slice(-2); return `${dd}/${mm}/${yy}`; })(new Date(agreement.createdAt || Date.now()))}
+                    {formatDateToMMDDYYYY(agreement.createdAt || Date.now())}
                   </p>
                   {agreement.fee && (
                     <p className="text-sm mt-2 font-bold uppercase tracking-wider opacity-90">

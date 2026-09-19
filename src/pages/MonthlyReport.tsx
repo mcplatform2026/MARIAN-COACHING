@@ -19,13 +19,10 @@ import {
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import { KeyMetricsSnapshot } from "../components/KeyMetricsSnapshot";
+import { getCurrentDateMMDDYYYY } from "../utils/dateFormat";
 
 const getFormattedCurrentDate = () => {
-  const d = new Date();
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = String(d.getFullYear()).slice(-2);
-  return `${day}/${month}/${year}`;
+  return getCurrentDateMMDDYYYY();
 };
 
 
@@ -163,8 +160,12 @@ export function MonthlyReport() {
     
     const parts = invoiceDateStr.split('/');
     if (parts.length === 3) {
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
+      let year = parseInt(parts[2], 10);
+      if (year < 100) year += 2000;
+      const p0 = parseInt(parts[0], 10);
+      const p1 = parseInt(parts[1], 10);
+      // If p0 > 12, it's DD/MM/YYYY so month is p1 - 1; otherwise MM/DD/YYYY so month is p0 - 1
+      const month = p0 > 12 ? p1 - 1 : p0 - 1;
       return year === targetYear && month === targetMonth;
     }
     

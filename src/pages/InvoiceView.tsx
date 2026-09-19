@@ -5,6 +5,7 @@ import { jsPDF } from "jspdf";
 import { Download, AlertCircle, RefreshCw } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { formatDateToMMDDYYYY } from "../utils/dateFormat";
 
 const themes: Record<string, any> = {
   white: { bg: '#ffffff', text: '#000000', border: '#000000', rowSeparator: '#e5e5e5' },
@@ -279,11 +280,7 @@ export function InvoiceView() {
             <div className="text-right">
               <h3 className="font-headline font-bold text-[10px] uppercase tracking-widest opacity-50 mb-2">Invoice Date</h3>
               <p className="font-headline font-bold text-sm">
-                {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }) : 'Date not set'}
+                {invoice.invoiceDate ? formatDateToMMDDYYYY(invoice.invoiceDate) : 'Date not set'}
               </p>
             </div>
           </div>

@@ -29,20 +29,7 @@ import {
   LockOpen,
   User
 } from "lucide-react";
-
-const formatDateToDDMMYYYY = (dateStr: string) => {
-  if (!dateStr) return dateStr === undefined ? undefined : '';
-  if (/^\d{2}\/\d{2}\/\d{2}$/.test(dateStr)) return dateStr;
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    const p = dateStr.split('/');
-    return `${p[0]}/${p[1]}/${p[2].slice(-2)}`;
-  }
-  const parts = dateStr.split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
-  }
-  return dateStr;
-};
+import { formatDateToMMDDYYYY } from "../utils/dateFormat";
 
 export function Sessions() {
   const navigate = useNavigate();
@@ -775,7 +762,7 @@ export function Sessions() {
 
   const handleGenerateInvoice = (session: Session) => {
     // Bridges to Finance! Prefills invoice generator
-    const formattedDate = formatDateToDDMMYYYY(session.date);
+    const formattedDate = formatDateToMMDDYYYY(session.date);
     const invoiceItem = {
       id: "session-item",
       title: `${session.title}`,
@@ -1148,7 +1135,7 @@ export function Sessions() {
                     <td className="p-4 font-semibold text-xs border-r-2 border-outline-variant whitespace-nowrap">
                       <div className="flex items-center gap-1.5 text-black">
                         <Calendar className="w-3.5 h-3.5 shrink-0 text-neutral-500" />
-                        <span>{formatDateToDDMMYYYY(session.date)}</span>
+                        <span>{formatDateToMMDDYYYY(session.date)}</span>
                       </div>
                       {session.time && (
                         <div className="flex items-center gap-1.5 text-neutral-500 text-[10px] mt-1 font-mono">

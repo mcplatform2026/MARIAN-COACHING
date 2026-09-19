@@ -4,6 +4,7 @@ import { useTransactions, Transaction } from '../hooks/useTransactions';
 import { useSessions } from '../hooks/useSessions';
 import { DataMigrationModal } from '../components/DataMigrationModal';
 import { Clock, FileText, CheckCircle2, ArrowUpRight, Download, Upload } from 'lucide-react';
+import { formatDateToMMDDYYYY } from '../utils/dateFormat';
 
 const parseDateString = (dateStr: string) => {
   if (!dateStr) return null;
@@ -12,20 +13,6 @@ const parseDateString = (dateStr: string) => {
   const month = parseInt(parts[1], 10) - 1; // 0-indexed month
   const day = parseInt(parts[2], 10);
   return { year, month, day };
-};
-
-const formatDateToDDMMYYYY = (dateStr: string) => {
-  if (!dateStr) return dateStr === undefined ? undefined : '';
-  if (/^\d{2}\/\d{2}\/\d{2}$/.test(dateStr)) return dateStr;
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    const p = dateStr.split('/');
-    return `${p[0]}/${p[1]}/${p[2].slice(-2)}`;
-  }
-  const parts = dateStr.split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
-  }
-  return dateStr;
 };
 
 export function Dashboard() {
@@ -180,7 +167,7 @@ export function Dashboard() {
     setEditingTransactionId(t.id);
     setEditType(t.type);
     setEditAmount(t.amount.toString());
-    setEditDate(t.date);
+    setEditDate(formatDateToMMDDYYYY(t.date));
     setEditDescription(t.description);
     setIsEditModalOpen(true);
   };
@@ -232,7 +219,7 @@ export function Dashboard() {
       return;
     }
     const headers = "Date,Type,Description,Amount\n";
-    const csvContent = transactions.map(t => `${formatDateToDDMMYYYY(t.date)},${t.type},"${t.description.replace(/"/g, '""')}",${t.amount}`).join("\n");
+    const csvContent = transactions.map(t => `${formatDateToMMDDYYYY(t.date)},${t.type},"${t.description.replace(/"/g, '""')}",${t.amount}`).join("\n");
     const blob = new Blob([headers + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -598,7 +585,7 @@ export function Dashboard() {
                         {session.clientName}
                       </span>
                       <span className="font-mono text-[10px] bg-[#ebf8ff] text-blue-800 border border-black px-1.5 py-0.5 font-bold uppercase whitespace-nowrap">
-                        {formatDateToDDMMYYYY(session.date)}
+                        {formatDateToMMDDYYYY(session.date)}
                       </span>
                     </div>
                     <p className="font-body font-bold text-xs uppercase text-neutral-800 truncate">
@@ -708,7 +695,7 @@ export function Dashboard() {
                      {!loading && filteredTransactions.length === 0 && <tr><td colSpan={5} className="p-4 text-center font-bold">No transactions found.</td></tr>}
                      {!loading && filteredTransactions.map((t, idx) => (
                        <tr key={idx} className="border-b-2 border-outline-variant hover:bg-surface-container-low transition-colors">
-                         <td className="p-4 font-medium text-sm border-r-2 border-outline-variant">{formatDateToDDMMYYYY(t.date)}</td>
+                         <td className="p-4 font-medium text-sm border-r-2 border-outline-variant">{formatDateToMMDDYYYY(t.date)}</td>
                          <td className="p-4 border-r-2 border-outline-variant">
                            <span className={`inline-block px-2 py-1 text-xs font-bold uppercase border-2 border-black ${t.type === 'Income' ? 'bg-blue-600 text-white' : 'bg-red-500 text-white'}`}>{t.type}</span>
                          </td>
@@ -783,7 +770,7 @@ export function Dashboard() {
                            <td className="p-4 border-r-2 border-outline-variant font-medium text-sm text-neutral-600">
                              <div className="flex items-center gap-1">
                                <Clock className="w-3.5 h-3.5 text-neutral-400" />
-                               {inv.invoiceDate ? formatDateToDDMMYYYY(inv.invoiceDate) : 'N/A'}
+                               {inv.invoiceDate ? formatDateToMMDDYYYY(inv.invoiceDate) : 'N/A'}
                              </div>
                            </td>
                            <td className="p-4 font-bold text-right font-headline text-lg border-r-2 border-outline-variant text-black">
@@ -874,13 +861,13 @@ export function Dashboard() {
 
               {/* Date */}
               <div>
-                <label className="block font-body font-bold text-[10px] mb-1.5 uppercase tracking-wide">Date (DD/MM/YYYY)</label>
+                <label className="block font-body font-bold text-[10px] mb-1.5 uppercase tracking-wide">Date (MM/DD/YYYY)</label>
                 <input
                   type="text"
                   required
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  placeholder="e.g. 14/04/2026"
+                  placeholder="e.g. 04/14/2026"
                   className="w-full text-xs p-2 border-2 border-black bg-surface-container-low focus:bg-white focus:outline-none text-black"
                 />
               </div>

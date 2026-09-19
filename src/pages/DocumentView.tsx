@@ -6,6 +6,7 @@ import domtoimage from 'dom-to-image-more';
 import jsPDF from 'jspdf';
 import html2canvas from "html2canvas-pro";
 import html2pdf from "html2pdf.js";
+import { formatDateToMMDDYYYY } from '../utils/dateFormat';
 
 const themes: any = {
   white: { bg: "#ffffff", cardBg: "#ffffff", text: "#000000", border: "#000000" },
@@ -237,7 +238,7 @@ export function DocumentView() {
                   </h1>
                   <p className="text-sm mt-2 opacity-80">Prepared for {agreement.clientName || 'Client'}</p>
                   {agreement.clientEmail && <p className="text-sm mt-1 opacity-80">{agreement.clientEmail}</p>}
-                  <p className="text-xs opacity-70 mt-1">{((d) => { const dd = String(d.getDate()).padStart(2, '0'); const mm = String(d.getMonth() + 1).padStart(2, '0'); const yy = String(d.getFullYear()).slice(-2); return `${dd}/${mm}/${yy}`; })(new Date(agreement.createdAt || Date.now()))}</p>
+                  <p className="text-xs opacity-70 mt-1">{formatDateToMMDDYYYY(agreement.createdAt || Date.now())}</p>
                   {agreement.fee && <p className="text-sm mt-2 font-bold uppercase tracking-wider opacity-90">Total Fee: {agreement.fee}</p>}
                 </div>
               </div>

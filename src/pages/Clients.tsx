@@ -4,20 +4,7 @@ import { useAgreements } from "../hooks/useAgreements";
 import { useAuth } from "../components/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { Pencil, Trash2, FileText, ExternalLink, Link, Plus, Upload, Download, Undo2 } from "lucide-react";
-
-const formatDateToDDMMYYYY = (dateStr: string) => {
-  if (!dateStr) return dateStr === undefined ? undefined : '';
-  if (/^\d{2}\/\d{2}\/\d{2}$/.test(dateStr)) return dateStr;
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    const p = dateStr.split('/');
-    return `${p[0]}/${p[1]}/${p[2].slice(-2)}`;
-  }
-  const parts = dateStr.split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
-  }
-  return dateStr;
-};
+import { formatDateToMMDDYYYY } from "../utils/dateFormat";
 
 export function Clients() {
   const { user } = useAuth();
@@ -475,8 +462,13 @@ export function Clients() {
   const parseDate = (dateStr: string) => {
     if (!dateStr) return 0;
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-      const [dd, mm, yyyy] = dateStr.split('/');
-      return new Date(`${yyyy}-${mm}-${dd}`).getTime();
+      const [p0, p1, yyyy] = dateStr.split('/');
+      const num0 = parseInt(p0, 10);
+      // If p0 > 12, it's DD/MM/YYYY
+      if (num0 > 12) {
+        return new Date(`${yyyy}-${p1}-${p0}`).getTime();
+      }
+      return new Date(`${yyyy}-${p0}-${p1}`).getTime();
     }
     return new Date(dateStr).getTime() || 0;
   };
@@ -717,7 +709,7 @@ export function Clients() {
                       let displayVal: any = client[col.id];
 
                       if (field?.type === 'date') {
-                        displayVal = formatDateToDDMMYYYY(displayVal);
+                        displayVal = formatDateToMMDDYYYY(displayVal);
                       } else if (field?.type === 'currency') {
                         displayVal = `$ ${Number(displayVal || 0).toLocaleString()}`;
                       } else if (field?.type === 'status') {
