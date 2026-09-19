@@ -562,11 +562,11 @@ export function Clients() {
             <h3 className="font-headline font-bold text-base md:text-lg uppercase tracking-tight whitespace-nowrap">Client Profiles</h3>
 
             <div className="flex flex-wrap md:flex-nowrap gap-2 items-center">
-              <div className="relative flex-1 md:w-64">
+              <div className="relative flex-1 md:w-72">
                 <span className="absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-400 text-sm md:text-base">search</span>
                 <input
                   type="text"
-                  placeholder="Search by name..."
+                  placeholder="Search by name or contract type..."
                   value={filterName}
                   onChange={(e) => setFilterName(e.target.value)}
                   className="w-full h-[36px] md:h-[40px] pl-8 pr-3 py-1.5 border-2 border-black bg-white font-body text-xs outline-none focus:border-primary-container transition-colors"
