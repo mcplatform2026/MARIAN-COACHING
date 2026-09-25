@@ -1,0 +1,12 @@
+{
+  "projectId": "marian-coaching",
+  "appId": "1:876483735447:web:8b2c3a1495d4ff25be9ed2",
+  "apiKey": "AIzaSyDpL26jtZF_9AuYgCHJkk2B5Gwjy6xjV2k",
+  "authDomain": "marian-coaching.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "marian-coaching.firebasestorage.app",
+  "messagingSenderId": "876483735447",
+  "measurementId": "G-74R6R2CTGZ",
+  "oAuthClientId": "",
+  "recaptchaSiteKey": ""
+}

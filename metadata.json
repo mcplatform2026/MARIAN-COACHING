@@ -1,0 +1,8 @@
+{
+  "name": "MARIAN COACHING",
+  "description": "Marian Coaching Client & Management Portal",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

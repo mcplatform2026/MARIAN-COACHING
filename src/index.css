@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800;900&family=Archivo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700;800&family=Alex+Brush&family=Herr+Von+Muellerhoff&family=Monsieur+La+Doulaise&family=Meow+Script&family=Caveat:wght@400..700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/amsterdam');
+@import url('https://fonts.cdnfonts.com/css/amsterdam-four');
+@import url('https://fonts.cdnfonts.com/css/amsterdam-one');
+@import url('https://db.onlinewebfonts.com/c/b06ff8f8ab6230bfebd06ebd22bbbd8e?family=Amsterdam+One');
+@import url('https://db.onlinewebfonts.com/c/7994fc6b6be6efbe06ebd22bbbd8e224?family=Amsterdam+Four');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f3;
+  --color-surface-container: #eeeeee;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-container-highest: #e2e2e2;
+  --color-surface-variant: #e2e2e2;
+  --color-surface: #f9f9f9;
+  --color-surface-dim: #dadada;
+  --color-surface-bright: #f9f9f9;
+  --color-surface-tint: #6933ff;
+  
+  --color-on-surface: #1a1c1c;
+  --color-on-surface-variant: #434655;
+  --color-inverse-surface: #2f3131;
+  --color-inverse-on-surface: #f1f1f1;
+
+  --color-primary: #6933ff;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #6933ff;
+  --color-on-primary-container: #eeefff;
+  --color-primary-fixed: #dbe1ff;
+  --color-on-primary-fixed: #00174b;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-inverse-primary: #b4c5ff;
+
+  --color-secondary: #5e5e5e;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #e2e2e2;
+  --color-on-secondary-container: #646464;
+  --color-secondary-fixed: #e2e2e2;
+  --color-on-secondary-fixed: #1b1b1b;
+  --color-secondary-fixed-dim: #c6c6c6;
+  --color-on-secondary-fixed-variant: #474747;
+
+  --color-tertiary: #46566c;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #5e6e85;
+  --color-on-tertiary-container: #e9f0ff;
+  --color-tertiary-fixed: #d3e4fe;
+  --color-on-tertiary-fixed: #0b1c30;
+  --color-tertiary-fixed-dim: #b7c8e1;
+  --color-on-tertiary-fixed-variant: #38485d;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-outline: #737686;
+  --color-outline-variant: #c3c6d7;
+  --color-background: #f9f9f9;
+  --color-on-background: #1a1c1c;
+
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-label: 'Plus Jakarta Sans', sans-serif;
+  --font-numbers: 'Sora', sans-serif;
+  --font-signature-1: 'Amsterdam One', 'Amsterdam', 'Amsterdam-One', cursive;
+  --font-signature-2: 'Caveat', cursive;
+  --font-signature-3: 'Monsieur La Doulaise', cursive;
+  --font-signature-4: 'Meow Script', cursive;
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  
+  .neu-border { border: 2px solid #000000; border-radius: 0px; }
+  .neu-shadow { box-shadow: 2px 2px 0px 0px #000000; }
+  .neu-shadow-sm { box-shadow: 2px 2px 0px 0px #000000; }
+  .neu-shadow-lg { box-shadow: 2px 2px 0px 0px #000000; }
+  
+  .neu-shadow-hover:hover, .neu-button:hover { 
+    box-shadow: 0px 0px 0px 0px #000000; 
+    transform: translate(2px, 2px); 
+    transition: all 0.1s ease-in-out; 
+  }
+}
+
+body { font-family: var(--font-body-family, 'Plus Jakarta Sans', sans-serif); background-color: var(--color-surface); color: var(--color-on-surface); }
+h1, h2, h3, h4, h5, h6, .font-headline { font-family: var(--font-headline-family, 'Space Grotesk', sans-serif); font-weight: 700 !important; }
+
+/* Custom print-specific styles */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Hide application navigation and chrome when printing directly from browser */
+  nav,
+  aside,
+  button,
+  .no-print,
+  [data-html2pdf-ignore="true"] {
+    display: none !important;
+  }
+
+  /* Remove any standard page descriptors like date or URL at margins */
+  @page {
+    size: A4 portrait;
+    margin: 0 !important;
+  }
+}
+
+
+/* Fix for TipTap Editor empty paragraphs collapsing */
+.tiptap-editor p, .studio-tiptap p {
+  min-height: 1.5rem;
+}
+/* Ensure tailwind prose doesn't override our margin inside the live editor */
+.prose .tiptap-editor p {
+  margin-top: 0.25em !important;
+  margin-bottom: 0.25em !important;
+  line-height: 1.6 !important;
+}
+
+/* Force empty paragraphs to render space */
+.tiptap-editor p:empty::before, .studio-tiptap p:empty::before {
+  content: '\00a0';
+}
+
+
+@layer base {
+  input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"], input[type="week"] {
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 0;
+    box-sizing: border-box;
+    border-radius: 0;
+  }
+
+  /* Full clickable native calendar picker indicator across the entire date input with zero lag */
+  .neu-date-picker-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+  }
+
+  .neu-date-picker-input::-webkit-datetime-edit,
+  .neu-date-picker-input::-webkit-inner-spin-button,
+  .neu-date-picker-input::-webkit-clear-button {
+    display: none !important;
+    -webkit-appearance: none !important;
+  }
+}
+
+/* Custom Sidebar Icon Animations */
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+@keyframes wiggle-icon {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+@keyframes ring-icon {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50% { transform: rotate(-10deg); }
+  20%, 40% { transform: rotate(10deg); }
+}
+@keyframes bounce-right-icon {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(3px, -3px); }
+}
+@keyframes write-icon {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2px, -2px) rotate(5deg); }
+  50% { transform: translate(-1px, 1px) rotate(-3deg); }
+  75% { transform: translate(1px, -1px) rotate(3deg); }
+}
+
+.anim-float { animation: float-icon 3s ease-in-out infinite; }
+.anim-pulse-slow { animation: pulse-icon 2.5s ease-in-out infinite; }
+.anim-wiggle { animation: wiggle-icon 2.5s ease-in-out infinite; }
+.anim-ring { animation: ring-icon 4s ease-in-out infinite; }
+.anim-bounce-right { animation: bounce-right-icon 2s ease-in-out infinite; }
+.anim-write { animation: write-icon 2s ease-in-out infinite; }
