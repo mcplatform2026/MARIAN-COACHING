@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAgreements, Agreement } from '../hooks/useAgreements';
 import { Check, Copy, FileText, Plus, Search, Trash2, PenTool, Eye, Mail, Clock, Bold, Italic, List, Heading1, Heading2, PaintBucket, Pilcrow, Strikethrough, ExternalLink, X } from 'lucide-react';
-import { MessageCircle, Download } from 'lucide-react';
+import { MessageCircle, Download, Loader2 } from 'lucide-react';
+import { generateUniversalPDF } from '../utils/pdfGenerator';
 import { useAuth } from '../components/AuthProvider';
 import { db } from '../lib/firebase';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
@@ -41,6 +42,43 @@ export function Agreements() {
   
   const [brandName, setBrandName] = useState(() => localStorage.getItem('brandName') || 'LOREM IPSUM');
   const [brandColor, setBrandColor] = useState(() => localStorage.getItem('brandColor') || '#6933ff');
+
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [activeDownloadAgreement, setActiveDownloadAgreement] = useState<Agreement | null>(null);
+  const hiddenPdfRef = useRef<HTMLDivElement>(null);
+
+  const handleInstantDownload = (agr: Agreement) => {
+    if (downloadingId) return;
+    setDownloadingId(agr.id);
+    setActiveDownloadAgreement(agr);
+  };
+
+  useEffect(() => {
+    if (activeDownloadAgreement && hiddenPdfRef.current) {
+      const doDownload = async () => {
+        try {
+          await generateUniversalPDF({
+            element: hiddenPdfRef.current!,
+            filename: `Agreement_${activeDownloadAgreement.clientName || 'Document'}.pdf`,
+            widthPx: 794,
+            minHeightPx: 1123,
+            backgroundColor: "#ffffff",
+            textColor: "#18181b",
+            scale: 2,
+            multiPage: true,
+          });
+        } catch (err) {
+          console.error("Instant PDF download failed:", err);
+          alert("Failed to download PDF. Please try again.");
+        } finally {
+          setDownloadingId(null);
+          setActiveDownloadAgreement(null);
+        }
+      };
+      const timer = setTimeout(doDownload, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [activeDownloadAgreement]);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -323,15 +361,19 @@ export function Agreements() {
                             <ExternalLink size={14} />
                           </a>
                           
-                          <a 
-                            href={`/agreement/${effectiveUid}/${agreement.id}?download=true`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 bg-white hover:bg-neutral-100 border-2 border-black transition-all hover:scale-105 text-black flex items-center justify-center"
+                          <button 
+                            type="button"
+                            onClick={() => handleInstantDownload(agreement)}
+                            disabled={downloadingId === agreement.id}
+                            className="p-1.5 bg-white hover:bg-neutral-100 border-2 border-black transition-all hover:scale-105 text-black flex items-center justify-center disabled:opacity-50"
                             title="Download Agreement PDF"
                           >
-                            <Download size={14} />
-                          </a>
+                            {downloadingId === agreement.id ? (
+                              <Loader2 size={14} className="animate-spin text-primary-container" />
+                            ) : (
+                              <Download size={14} />
+                            )}
+                          </button>
                           
                           <button 
                             onClick={(e) => { e.preventDefault(); handleShareHostedLink(agreement, 'whatsapp'); }}
@@ -422,6 +464,228 @@ export function Agreements() {
                 className="w-full h-full border-none absolute inset-0 bg-white"
                 title="Agreement Preview"
               />
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Hidden container for instant background PDF generation */}
+      {activeDownloadAgreement && (
+        <div style={{ position: "fixed", left: "-9999px", top: 0, width: "800px", zIndex: -9999, opacity: 0, pointerEvents: "none" }}>
+          <div
+            ref={hiddenPdfRef}
+            className="w-[800px] bg-white p-12 text-[#18181b]"
+            style={{ minHeight: "297mm", backgroundColor: "#ffffff" }}
+          >
+            {/* Header Block */}
+            <div className="flex flex-row justify-between items-start pb-6 border-b-2 border-neutral-900 mb-6 gap-6 header-block">
+              <div>
+                {activeDownloadAgreement.logoImage ? (
+                  <div style={{ maxWidth: "220px", display: "flex", justifyContent: "flex-start" }}>
+                    <img
+                      src={activeDownloadAgreement.logoImage}
+                      alt="Brand Logo"
+                      style={{ maxHeight: "64px", maxWidth: "100%", objectFit: "contain" }}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <div className="font-headline font-black text-2xl uppercase tracking-tight text-neutral-950">
+                      {brandName || "MARIAN COACHING"}
+                    </div>
+                    <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-neutral-500 mt-0.5">
+                      Professional Coaching & Consulting
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="text-right shrink-0">
+                <span className="inline-block text-[10px] font-headline font-black tracking-widest uppercase px-3 py-1 bg-neutral-100 border border-neutral-300 text-neutral-800 mb-2">
+                  OFFICIAL CLIENT AGREEMENT
+                </span>
+                {activeDownloadAgreement.status === "accepted" ? (
+                  <div className="text-xs font-headline font-bold text-emerald-700 flex items-center justify-end gap-1.5 uppercase">
+                    <Check size={14} className="stroke-[3]" /> EXECUTED & SIGNED
+                  </div>
+                ) : (
+                  <div className="text-xs font-headline font-bold text-amber-700 flex items-center justify-end gap-1.5 uppercase">
+                    • {activeDownloadAgreement.status === "sent" ? "PENDING SIGNATURE" : "OFFICIAL DRAFT"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Document Title */}
+            <div className="mb-6">
+              <h1 className="text-2xl sm:text-3xl font-headline font-black uppercase tracking-tight text-neutral-950 mb-1">
+                {activeDownloadAgreement.title || "CLIENT SERVICES AGREEMENT"}
+              </h1>
+              <p className="text-xs text-neutral-500 font-body">
+                Legally binding contract between the parties identified below.
+              </p>
+            </div>
+
+            {/* Executive Agreement Metadata Grid */}
+            <div className="border border-neutral-300 bg-neutral-50/70 p-5 mb-8 metadata-card">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3.5 font-body">
+                <div>
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                    CLIENT LEGAL NAME
+                  </span>
+                  <span className="text-sm font-bold text-neutral-950 block">
+                    {activeDownloadAgreement.clientName || "Client Name"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                    SERVICE PROVIDER
+                  </span>
+                  <span className="text-sm font-bold text-neutral-950 block">
+                    {activeDownloadAgreement.providerSignatureLabel || "Marian Coaching, LLC"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                    CLIENT CONTACT EMAIL
+                  </span>
+                  <span className="text-sm font-medium text-neutral-800 block">
+                    {activeDownloadAgreement.clientEmail || "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                    TOTAL INVESTMENT / FEE
+                  </span>
+                  <span className="text-sm font-black text-emerald-800 block">
+                    {activeDownloadAgreement.fee || "As specified in project scope"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                    AGREEMENT EFFECTIVE DATE
+                  </span>
+                  <span className="text-sm font-bold text-neutral-900 block">
+                    {formatDateToMMDDYYYY(activeDownloadAgreement.agreementDate || activeDownloadAgreement.createdAt || Date.now())}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                    EXECUTION STATUS
+                  </span>
+                  <span className="text-sm font-bold uppercase text-neutral-900 block">
+                    {activeDownloadAgreement.status === "accepted" ? "Signed & Legally Binding" : "Official Agreement"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Agreement Content (Rich Text) */}
+            <div className="agreement-prose mb-12">
+              <style>{`
+                .agreement-prose h1, .agreement-prose h2, .agreement-prose h3 {
+                  page-break-after: avoid !important;
+                  break-after: avoid !important;
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  color: #09090b;
+                  margin-top: 1.5rem !important;
+                  margin-bottom: 0.5rem !important;
+                }
+                .agreement-prose h1 { font-size: 1.45rem; border-bottom: 1.5px solid #e4e4e7; padding-bottom: 0.3rem; }
+                .agreement-prose h2 { font-size: 1.25rem; }
+                .agreement-prose h3 { font-size: 1.05rem; }
+                .agreement-prose p, .agreement-prose li {
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
+                  line-height: 1.65;
+                  color: #18181b;
+                }
+                .agreement-prose p { margin-bottom: 0.75rem; }
+                .agreement-prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.85rem; }
+                .agreement-prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.85rem; }
+                .header-block { page-break-inside: avoid !important; break-inside: avoid !important; }
+                .metadata-card { page-break-inside: avoid !important; break-inside: avoid !important; }
+                .signatures-block { page-break-inside: avoid !important; break-inside: avoid !important; }
+              `}</style>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html:
+                    activeDownloadAgreement.projectDetails ||
+                    '<p className="italic opacity-50">Project details and scope will appear here...</p>',
+                }}
+              />
+            </div>
+
+            {/* Signatures & Execution Section */}
+            <div className="mt-14 pt-8 border-t-2 border-neutral-900 signatures-block">
+              <h3 className="font-headline font-black uppercase text-base tracking-wider mb-1">
+                SIGNATURES & EXECUTION
+              </h3>
+              <p className="text-xs text-neutral-600 mb-6 font-body leading-relaxed">
+                IN WITNESS WHEREOF, the Service Provider and the Client have duly executed and delivered this Client Agreement as of the dates set forth below.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6 w-full signatures-row">
+                {/* Service Provider Box */}
+                <div className="flex flex-col border border-neutral-300 bg-neutral-50/40 p-4">
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 mb-2">
+                    SERVICE PROVIDER SIGNATURE
+                  </span>
+                  <div className="w-full h-28 border-b-2 border-neutral-900 flex items-center justify-center bg-white px-2 py-1 mb-3">
+                    {activeDownloadAgreement.providerSignature ? (
+                      <img
+                        src={activeDownloadAgreement.providerSignature}
+                        alt="Service Provider Signature"
+                        className="max-h-20 max-w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-xs text-neutral-400 font-headline uppercase italic">
+                        Signature on File
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-headline font-bold text-xs uppercase text-neutral-950 truncate">
+                    {activeDownloadAgreement.providerSignatureLabel || "Service Provider"}
+                  </span>
+                  <span className="text-[11px] font-body text-neutral-500 mt-0.5">
+                    Date: {formatDateToMMDDYYYY(activeDownloadAgreement.agreementDate || activeDownloadAgreement.createdAt || Date.now())}
+                  </span>
+                  <span className="text-[10px] font-headline font-bold text-emerald-700 mt-1 uppercase">
+                    ✓ Authorized Representative
+                  </span>
+                </div>
+
+                {/* Client Box */}
+                <div className="flex flex-col border border-neutral-300 bg-neutral-50/40 p-4">
+                  <span className="text-[10px] font-headline font-black uppercase tracking-wider text-neutral-500 mb-2">
+                    CLIENT ACCEPTANCE & SIGNATURE
+                  </span>
+                  <div className="w-full h-28 border-b-2 border-neutral-900 flex items-center justify-center bg-white px-2 py-1 mb-3">
+                    {activeDownloadAgreement.clientSignature ? (
+                      <img
+                        src={activeDownloadAgreement.clientSignature}
+                        alt="Client Signature"
+                        className="max-h-20 max-w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-xs text-neutral-400 font-headline uppercase italic">
+                        {activeDownloadAgreement.status === "accepted" ? "Digitally Signed" : "Pending Signature"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-headline font-bold text-xs uppercase text-neutral-950 truncate">
+                    {activeDownloadAgreement.clientName || "Client Name"}
+                  </span>
+                  <span className="text-[11px] font-body text-neutral-500 mt-0.5">
+                    Date: {activeDownloadAgreement.acceptedAt ? formatDateToMMDDYYYY(activeDownloadAgreement.acceptedAt) : "Pending Client Acceptance"}
+                  </span>
+                  <span className="text-[10px] font-headline font-bold mt-1 uppercase text-emerald-700">
+                    {activeDownloadAgreement.status === "accepted" ? "✓ Verified Digital Signature" : "• Pending Signature"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
